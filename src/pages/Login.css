@@ -1,0 +1,97 @@
+/* Tampilan halaman penuh dan center */
+.login-page {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #003E69;
+}
+.card-divider {
+  border: none;
+  border-top: 1px solid #000000;
+  margin-bottom: 45px;
+ 
+  width: 100%; /* Atau bisa juga width: 80% untuk garis lebih pendek */
+}
+
+.login-card {
+  background-color: #d9d9d9;
+  padding: 30px 40px;
+  width: fit-content;        /* Ukuran otomatis menyesuaikan isi */
+  max-width: 90vw;           /* Batas maksimum agar tidak terlalu lebar di layar kecil */
+  box-sizing: border-box;
+  text-align: center;
+}
+
+
+/* Header container: sejajarkan logo dan teks */
+.login-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  justify-content: center; /* tengah secara horizontal */
+}
+
+/* Logo */
+.login-logo {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+}
+
+/* Teks di sebelah logo */
+.login-title h5 {
+  margin: 0;
+  font-size: 12px;
+}
+
+.hlogin {
+    margin: 0;
+  font-size: 12px;
+  margin-bottom: 15px;
+}
+
+/* Input form */
+.form-group {
+  text-align: left;
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  outline: none;
+  border-width: 1px;
+}
+
+/* Tombol */
+button[type="submit"] {
+  width: 40%;
+  padding: 6px 9px;
+  background-color: #003E69;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 10px;
+}
+
+button[type="submit"]:hover {
+  background-color: #0056b3;
+}
+
+/* Footer */
+.login-footer {
+  margin-top: 50px;
+  font-size: 8px;
+  color: black;
+}
