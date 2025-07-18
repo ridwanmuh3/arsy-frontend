@@ -1,0 +1,193 @@
+.dashboard {
+   display: flex;
+  flex-direction: column;
+  height: 100vh;
+
+}
+.form-card {
+  background-color: white;
+  padding: 30px 40px;
+  width: 90%;
+  max-width: 750px;
+  box-sizing: border-box;
+  text-align: center;
+  margin: 20px auto;
+  border-radius: 12px;
+}
+
+.top-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background-color: #d3d3d3;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo {
+  width: 40px;
+  height: 40px;
+}
+
+.title-main {
+  font-weight: bold;
+}
+
+.title-sub {
+  font-size: 14px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  gap: 6px;
+}
+
+.divider {
+  height: 2px;
+  background-color: black;
+  border: none;
+  margin:0;
+}
+
+.form-group1 {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+.form-group2 {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+.form-group3 {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+.form-group4 {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+.form-group5 {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+.form-group6 {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+.form-group1 select {
+  flex: 1; /* Input mengisi sisa ruang */
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  box-sizing: border-box;
+  margin-left: 10px;
+}
+.form-group2 input{
+  flex: 1; /* Input mengisi sisa ruang */
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  box-sizing: border-box;
+  margin-left: 145px;
+}
+.form-group3 input{
+  flex: 1; /* Input mengisi sisa ruang */
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  box-sizing: border-box;
+  margin-left: 153px;
+}
+.form-group4 input{
+  flex: 1; /* Input mengisi sisa ruang */
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  box-sizing: border-box;
+  margin-left: 165px;
+}
+.form-group5 input{
+  flex: 1; /* Input mengisi sisa ruang */
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  box-sizing: border-box;
+  margin-left: 110px;
+}
+.form-group6 select{
+    flex: 1; /* Input mengisi sisa ruang */
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  box-sizing: border-box;
+  margin-left: 115px;
+}
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #d3d3d3;
+  font-family: sans-serif;
+}
+
+.button-group {
+  display: flex;
+  justify-content: center; /* ⬅️ Ini agar tombol berada di tengah */
+  gap: 8px;                /* Jarak antar tombol */
+  margin-top: 20px;
+}
+
+.btn-lihat,
+.btn-submit {
+  padding: 5px 12px;     /* ⬅️ Ukuran tombol kecil */
+  font-size: 12px;       /* ⬅️ Teks lebih kecil */
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  min-width: 80px;       /* Opsional, biar nggak terlalu sempit */
+  text-align: center;
+  margin-top: 8px ;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+
+.btn-lihat {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-lihat:hover {
+  background-color: #5a6268;
+}
+
+.btn-submit {
+  background-color: #003E69;
+  color: #ffffff;
+}
+
+.btn-submit:hover {
+  background-color: #002f50;
+}
+
+
+
+
+

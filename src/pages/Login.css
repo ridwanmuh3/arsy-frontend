@@ -73,21 +73,20 @@
   border-width: 1px;
 }
 
-/* Tombol */
+
 button[type="submit"] {
-  width: 40%;
-  padding: 6px 9px;
-  background-color: #003E69;
-  color: white;
+  width: 50% !important;
+  padding: 6px 9px !important;
+  background-color: #003E69 !important;
+  color: white !important;
   border: none;
-  border-radius: 6px;
+  border-radius: 6px !important;
   cursor: pointer;
-  font-size: 10px;
+  font-size: 10px !important;
+  
 }
 
-button[type="submit"]:hover {
-  background-color: #0056b3;
-}
+
 
 /* Footer */
 .login-footer {

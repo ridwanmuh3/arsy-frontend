@@ -49,3 +49,107 @@ button[type="submit"] {
 button[type="submit"]:hover {
   background-color: #0056b3;
 }
+/*
+.container {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+}
+
+@media (max-width: 600px) {
+  .form-row {
+    flex-direction: column;
+  }
+}
+
+hr {
+  width: 100vw;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .form-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .button-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-lihat,
+  .btn-submit {
+    width: 100%;
+  }
+}
+
+
+.form-card {
+  width: 100%;
+  max-width: 700px;
+  margin: 20px auto;
+  padding: 20px;
+  box-sizing: border-box;
+  background: white;
+  border-radius: 12px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 15px;
+  gap: 10px;
+}
+
+.form-group label {
+  flex: 0 0 160px;
+  text-align: left;
+}
+
+.form-group input,
+.form-group select {
+  flex: 1;
+  padding: 8px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.button-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@media (max-width: 600px) {
+  .form-group {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .form-group label {
+    flex: unset;
+  }
+
+  .button-group {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn-submit,
+  .btn-lihat {
+    width: 100%;
+  }
+}
+*/
