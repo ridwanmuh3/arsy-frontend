@@ -1,0 +1,29 @@
+h2 {
+  text-align: center;
+}
+
+table.informasi-peminjaman {
+  margin-block: 1.8rem;
+  margin-bottom: 2.4rem;
+  font-size: 1.1rem;
+}
+
+table.informasi-peminjaman tr {
+  line-height: 2.2;
+}
+
+.nota-peminjaman {
+  font-family: "serif";
+}
+
+.nota-peminjaman p.tempat-tanggal {
+  font-family: "serif";
+  font-size: 1.1rem;
+  text-align: end;
+}
+
+.nota-peminjaman .catatan {
+  margin-top: 1.2rem;
+  line-height: 0.5;
+  font-size: 0.8rem;
+}
