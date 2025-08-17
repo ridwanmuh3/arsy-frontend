@@ -9,16 +9,11 @@ import {
   Button,
   Snackbar,
   CircularProgress,
+  IconButton,
 } from "@mui/material";
 import { blue, green, grey } from "@mui/material/colors";
-import {
-  Fragment,
-  type MouseEvent,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
-import { Visibility } from "@mui/icons-material";
+import { Fragment, type MouseEvent, useEffect, useState } from "react";
+import { Refresh, Visibility } from "@mui/icons-material";
 import dayjs from "dayjs";
 import {
   findAllSearchDocumentsRequest,
@@ -43,6 +38,7 @@ const tableColumns = [
 
 const SearchDocumentRequest = () => {
   const [showSnackbar, setShowSnackbar] = useState<boolean>(false);
+  const [showNotification, setShowNotification] = useState<boolean>(false);
   const [searchDocumentData, setSearchDocumentData] = useState<
     SearchDocumentSchema[]
   >([]);
@@ -98,13 +94,6 @@ const SearchDocumentRequest = () => {
         return;
       }
 
-      if (
-        searchDocumentData &&
-        fetchedSearchDocumentsRequest.length === searchDocumentData.length
-      ) {
-        console.log("already updated");
-        return;
-      }
       setSearchDocumentData(fetchedSearchDocumentsRequest);
       setShowSnackbar(true);
     } catch (error) {
@@ -117,7 +106,11 @@ const SearchDocumentRequest = () => {
     }
   };
 
-  const fetchData = useCallback(async () => {
+  const showNotificationHandler = () => {
+    setShowNotification((prevState) => !prevState);
+  };
+
+  const fetchData = async () => {
     try {
       setIsLoading(true);
 
@@ -128,6 +121,14 @@ const SearchDocumentRequest = () => {
         return;
       }
 
+      if (
+        fetchedSearchDocumentsRequest.length > searchDocumentData.length &&
+        fetchedSearchDocumentsRequest.some(
+          (doc: SearchDocumentSchema) => doc.status !== "COMPLETED",
+        )
+      ) {
+        setShowNotification(true);
+      }
       setSearchDocumentData(fetchedSearchDocumentsRequest);
 
       const fetchedLoanNotes = await findAllLoanNotes();
@@ -143,16 +144,10 @@ const SearchDocumentRequest = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      fetchData();
-    }, 4800);
-
-    return () => {
-      clearInterval(interval);
-    };
+    fetchData();
   }, []);
 
   return (
@@ -169,7 +164,27 @@ const SearchDocumentRequest = () => {
             paddingY: "0.5rem",
           }}
         >
-          <h1>Permintaan Pencarian Berkas</h1>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "2rem",
+            }}
+          >
+            <h1>Permintaan Pencarian Berkas</h1>
+            <IconButton
+              sx={{
+                height: "2.5rem",
+              }}
+              title="Refresh"
+              onClick={() => {
+                fetchData();
+              }}
+            >
+              <Refresh color="primary" />
+            </IconButton>
+          </Box>
           <TableContainer
             sx={{
               boxShadow: 1,
@@ -220,7 +235,11 @@ const SearchDocumentRequest = () => {
                           {data.status}
                         </Button>
                       </TableCell>
-                      <TableCell>{data.changed_by_archivist_name}</TableCell>
+                      <TableCell>
+                        {data.changed_by_archivist_name
+                          ? data.changed_by_archivist_name
+                          : "Belum Diketahui"}
+                      </TableCell>
                       <TableCell>
                         {dayjs(data.changed_at).format("DD MMMM YYYY HH:mm:ss")}
                       </TableCell>
@@ -299,6 +318,15 @@ const SearchDocumentRequest = () => {
           autoHideDuration={2500}
           onClose={showSnackbarHandler}
           message="Berhasil mengubah status request"
+        />
+      )}
+      {showNotification && (
+        <Snackbar
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+          open={showNotification}
+          autoHideDuration={2500}
+          onClose={showNotificationHandler}
+          message="Terdapat request pencarian berkas baru"
         />
       )}
     </Fragment>

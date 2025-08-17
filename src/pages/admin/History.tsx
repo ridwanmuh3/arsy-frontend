@@ -8,15 +8,17 @@ import {
   TableBody,
   Chip,
   CircularProgress,
+  Snackbar,
+  IconButton,
 } from "@mui/material";
 import { Fragment, useCallback, useEffect, useState } from "react";
-import { useAuth } from "../../hooks/auth";
 import { isAxiosError } from "axios";
 import { findAllSearchDocumentsRequest } from "../../api/search-documents";
 import dayjs from "dayjs";
 import { blue, green, grey } from "@mui/material/colors";
 import { getUserFromToken } from "../../lib/auth";
 import type { SearchDocumentSchema } from "../../schemas/search-document";
+import { Refresh } from "@mui/icons-material";
 
 dayjs().locale();
 
@@ -35,9 +37,13 @@ const tableColumns = [
 
 const History = () => {
   const [historyData, setHistoryData] = useState<SearchDocumentSchema[]>([]);
+  const [showSnackbar, setShowSnackbar] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const auth = useAuth();
   const user = getUserFromToken();
+
+  const showSnackbarHandler = () => {
+    setShowSnackbar((prevState) => !prevState);
+  };
 
   const fetchData = useCallback(async () => {
     try {
@@ -58,17 +64,11 @@ const History = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [historyData, auth.token]);
+  }, [historyData]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      fetchData();
-    }, 4800);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [fetchData]);
+    fetchData();
+  }, []);
 
   const currentHistoryForUser =
     historyData && historyData.length > 0 && user?.role === "LOCKET"
@@ -89,7 +89,28 @@ const History = () => {
             paddingY: "0.5rem",
           }}
         >
-          <h1>Riwayat Permintaan Pencarian Berkas</h1>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "2rem",
+            }}
+          >
+            <h1>Riwayat Permintaan Pencarian Berkas</h1>
+            <IconButton
+              sx={{
+                height: "2.5rem",
+              }}
+              title="Refresh"
+              onClick={() => {
+                fetchData();
+              }}
+            >
+              <Refresh color="primary" />
+            </IconButton>
+          </Box>
+
           <TableContainer
             sx={{
               boxShadow: 1,
@@ -139,7 +160,7 @@ const History = () => {
                       </TableCell>
                       <TableCell>
                         {data.changed_by_archivist_name
-                          ? data.created_by_locket_officer_name
+                          ? data.changed_by_archivist_name
                           : "Belum diketahui"}
                       </TableCell>
                       <TableCell>
@@ -159,6 +180,15 @@ const History = () => {
           </TableContainer>
         </Box>
       </Box>
+      {showSnackbar && (
+        <Snackbar
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+          open={showSnackbar}
+          autoHideDuration={2500}
+          onClose={showSnackbarHandler}
+          message="Terdapat perubahan data request pencarian"
+        />
+      )}
     </Fragment>
   );
 };

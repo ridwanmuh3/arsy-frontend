@@ -46,7 +46,6 @@ const Document = () => {
     useState<boolean>(false);
   const [showSnackbar, setShowSnackbar] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const auth = useAuth();
 
   const showAddDocumentHandler = (e: MouseEvent) => {
     e.preventDefault();
@@ -108,16 +107,10 @@ const Document = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [auth.token, documents]);
+  }, [documents]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      fetchData();
-    }, 4800);
-
-    return () => {
-      clearInterval(interval);
-    };
+    fetchData();
   }, []);
 
   return (

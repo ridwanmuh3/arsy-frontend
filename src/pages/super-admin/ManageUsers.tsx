@@ -64,7 +64,6 @@ const ManageUsers = () => {
   const [showSnackbar, setShowSnackbar] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const auth = useAuth();
 
   const changePageIndexHandler = (_: ChangeEvent<unknown>, value: number) => {
     setPage(value);
@@ -92,7 +91,7 @@ const ManageUsers = () => {
     try {
       setSnackbarMessage("");
       setIsLoading(true);
-      const result = await registerUser(auth.token!, user);
+      const result = await registerUser(user);
       if (isAxiosError(result)) {
         console.error(result.code);
         if (users.length === 0) {
@@ -101,7 +100,7 @@ const ManageUsers = () => {
         return;
       }
 
-      const fetchedUsers = await findAllUsers(auth.token!);
+      const fetchedUsers = await findAllUsers();
       if (isAxiosError(fetchedUsers)) {
         console.error(fetchedUsers.code);
         if (users.length === 0) {
@@ -127,7 +126,7 @@ const ManageUsers = () => {
     try {
       setSnackbarMessage("");
       setIsLoading(true);
-      const result = await updateUser(auth.token!, updatedUser);
+      const result = await updateUser(updatedUser);
       if (isAxiosError(result)) {
         console.error(result.code);
         if (users.length === 0) {
@@ -136,7 +135,7 @@ const ManageUsers = () => {
         return;
       }
 
-      const fetchedUsers = await findAllUsers(auth.token!);
+      const fetchedUsers = await findAllUsers();
       if (isAxiosError(fetchedUsers)) {
         console.error(fetchedUsers.code);
         if (users.length === 0) {
@@ -170,14 +169,14 @@ const ManageUsers = () => {
     try {
       setSnackbarMessage("");
       setIsLoading(true);
-      const result = await deleteUser(auth.token!, userID);
+      const result = await deleteUser(userID);
       if (isAxiosError(result)) {
         console.error(result.code);
         setUsers([]);
         return;
       }
 
-      const fetchedUsers = await findAllUsers(auth.token!);
+      const fetchedUsers = await findAllUsers();
       if (isAxiosError(fetchedUsers)) {
         console.error(fetchedUsers.code);
         setUsers([]);
@@ -210,7 +209,7 @@ const ManageUsers = () => {
   const fetchUsers = useCallback(async () => {
     try {
       setIsLoading(true);
-      const fetchedUsers = await findAllUsers(auth.token!);
+      const fetchedUsers = await findAllUsers();
       if (isAxiosError(fetchedUsers)) {
         console.error(fetchedUsers.code);
         if (users.length === 0) {
@@ -226,7 +225,7 @@ const ManageUsers = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [users, auth.token]);
+  }, [users]);
 
   useEffect(() => {
     if (page > 1 && users.length <= usersPerPage) {
@@ -235,13 +234,7 @@ const ManageUsers = () => {
   }, [page, users]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      fetchUsers();
-    }, 4800);
-
-    return () => {
-      clearInterval(interval);
-    };
+    fetchUsers();
   }, []);
 
   return (

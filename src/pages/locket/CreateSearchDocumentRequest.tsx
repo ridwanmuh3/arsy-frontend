@@ -14,7 +14,6 @@ import { useForm } from "react-hook-form";
 import { loanNoteSchema, type LoanNoteSchema } from "../../schemas/loan-note";
 import { dateTimeHandler } from "../../lib";
 import LoanNote from "../../components/LoanNote";
-import { useAuth } from "../../hooks/auth";
 import { isAxiosError } from "axios";
 import { createLoanNote } from "../../api/loan-note";
 import { createSearchDocumentRequest } from "../../api/search-documents";
@@ -28,20 +27,19 @@ const CreateSearchDocumentRequest = () => {
   const form = useForm({
     resolver: zodResolver(loanNoteSchema),
   });
-  const auth = useAuth();
 
   const submitHandler = async (data: LoanNoteSchema) => {
     try {
       setIsLoading(true);
       setLoanNoteData(data);
 
-      let result = await createLoanNote(auth.token!, data);
+      let result = await createLoanNote(data);
       if (isAxiosError(result)) {
         console.error(result.code);
         return;
       }
 
-      result = await createSearchDocumentRequest(auth.token!, {
+      result = await createSearchDocumentRequest({
         nomor_berkas: data.nomor_berkas,
         nama_pemilik: data.nama_peminjam,
         desa: data.desa,
