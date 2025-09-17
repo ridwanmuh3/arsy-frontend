@@ -30,7 +30,6 @@ import {
   registerUser,
   updateUser,
 } from "../../api/users";
-import { useAuth } from "../../hooks/auth";
 import { isAxiosError } from "axios";
 import dayjs from "dayjs";
 

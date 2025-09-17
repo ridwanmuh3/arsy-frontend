@@ -21,7 +21,6 @@ import {
 import AddDocumentDialog from "../../components/admin/AddDocumentDialog";
 import type { DocumentSchema } from "../../schemas/document";
 import { isAxiosError } from "axios";
-import { useAuth } from "../../hooks/auth";
 import { addDocument, findAllDocuments } from "../../api/documents";
 
 const tableColumns = [
