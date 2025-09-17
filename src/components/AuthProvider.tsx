@@ -82,9 +82,9 @@ export const AuthProvider = ({ children }: AuthProps) => {
   };
 
   useEffect(() => {
-    if (token) {
-      localStorage.setItem("access_token", token.access_token!);
-      localStorage.setItem("refresh_token", token.refresh_token!);
+    if (token && token.access_token && token.refresh_token) {
+      localStorage.setItem("access_token", token.access_token);
+      localStorage.setItem("refresh_token", token.refresh_token);
     } else {
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
