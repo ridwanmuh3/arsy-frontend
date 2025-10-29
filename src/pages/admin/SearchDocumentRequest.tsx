@@ -10,6 +10,7 @@ import {
   Snackbar,
   CircularProgress,
   IconButton,
+  TablePagination,
 } from "@mui/material";
 import { blue, green, grey } from "@mui/material/colors";
 import { Fragment, type MouseEvent, useEffect, useState } from "react";
@@ -49,9 +50,28 @@ const SearchDocumentRequest = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [requestID, setRequestID] = useState<string>("");
 
+  const [page, setPage] = useState<number>(0);
+  const [rowsPerPage, setRowsPerPage] = useState<number>(10);
+
+  const handleChangePage = (_: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
   const showConfirmDialogHandler = (e: MouseEvent) => {
     e.preventDefault();
     setShowConfirmDialog((prevState) => !prevState);
+  };
+
+  const showLoanNoteHandler = (e: MouseEvent) => {
+    e.preventDefault();
+    setShowLoanNote((prev) => !prev);
   };
 
   const showSnackbarHandler = () => {
@@ -68,14 +88,10 @@ const SearchDocumentRequest = () => {
       }
 
       let state = data.status;
-      if (data) {
-        if (state === "PENDING") {
-          state = "APPROVED";
-        } else if (state === "APPROVED") {
-          state = "COMPLETED";
-        } else {
-          state = "COMPLETED";
-        }
+      if (state === "PENDING") {
+        state = "APPROVED";
+      } else if (state === "APPROVED") {
+        state = "COMPLETED";
       }
 
       const result = await updateStatusSearchDocumentRequest({
@@ -97,8 +113,7 @@ const SearchDocumentRequest = () => {
       setSearchDocumentData(fetchedSearchDocumentsRequest);
       setShowSnackbar(true);
     } catch (error) {
-      const err = error as Error;
-      console.error(err.message);
+      console.error((error as Error).message);
     } finally {
       setRequestID("");
       setIsLoading(false);
@@ -124,7 +139,7 @@ const SearchDocumentRequest = () => {
       if (
         fetchedSearchDocumentsRequest.length > searchDocumentData.length &&
         fetchedSearchDocumentsRequest.some(
-          (doc: SearchDocumentSchema) => doc.status !== "COMPLETED",
+          (doc: SearchDocumentSchema) => doc.status !== "COMPLETED"
         )
       ) {
         setShowNotification(true);
@@ -139,8 +154,7 @@ const SearchDocumentRequest = () => {
 
       setLoanNoteData(fetchedLoanNotes);
     } catch (error) {
-      const err = error as Error;
-      console.error(err.message);
+      console.error((error as Error).message);
     } finally {
       setIsLoading(false);
     }
@@ -150,22 +164,25 @@ const SearchDocumentRequest = () => {
     fetchData();
   }, []);
 
+  const paginatedData = searchDocumentData.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
+
   return (
     <Fragment>
-      <Box
-        sx={{
-          paddingLeft: "17rem",
-          paddingBottom: "2rem",
-        }}
-      >
+      <Box sx={{ paddingLeft: "17rem", paddingBottom: "2rem" }}>
         <Box
           sx={{
             paddingX: "2rem",
-            paddingY: "0.5rem",
+            display: "flex",
+            flexDirection: "column",
+            gap: "1.2rem",
           }}
         >
           <Box
             sx={{
+              paddingTop: "0.8rem",
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
@@ -174,9 +191,7 @@ const SearchDocumentRequest = () => {
           >
             <h1>Permintaan Pencarian Berkas</h1>
             <IconButton
-              sx={{
-                height: "2.5rem",
-              }}
+              sx={{ height: "2.5rem" }}
               title="Refresh"
               onClick={() => {
                 fetchData();
@@ -185,11 +200,7 @@ const SearchDocumentRequest = () => {
               <Refresh color="primary" />
             </IconButton>
           </Box>
-          <TableContainer
-            sx={{
-              boxShadow: 1,
-            }}
-          >
+          <TableContainer sx={{ boxShadow: 1 }}>
             <Table>
               <TableHead>
                 <TableRow>
@@ -199,20 +210,15 @@ const SearchDocumentRequest = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {searchDocumentData && searchDocumentData.length > 0 ? (
-                  searchDocumentData.map((data, index) => (
-                    <TableRow
-                      key={data.id}
-                      sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                    >
-                      <TableCell>{index + 1}</TableCell>
+                {paginatedData && paginatedData.length > 0 ? (
+                  paginatedData.map((data, index) => (
+                    <TableRow key={data.id}>
+                      <TableCell>{page * rowsPerPage + index + 1}</TableCell>
                       <TableCell>
                         {data.created_by_locket_officer_name}
                       </TableCell>
                       <TableCell>
-                        {dayjs(data.created_at).format(
-                          "DD MMMM YYYY HH:mm:ss",
-                        )}{" "}
+                        {dayjs(data.created_at).format("DD MMMM YYYY HH:mm:ss")}
                       </TableCell>
                       <TableCell>
                         <Button
@@ -221,14 +227,14 @@ const SearchDocumentRequest = () => {
                               data.status === "PENDING"
                                 ? grey[100]
                                 : data.status === "APPROVED"
-                                  ? blue[100]
-                                  : green[100],
+                                ? blue[100]
+                                : green[100],
                             color: grey[800],
                           }}
                           onClick={(e: MouseEvent) => {
                             e.preventDefault();
                             setRequestID(data.id!);
-                            setShowConfirmDialog((prevState) => !prevState);
+                            setShowConfirmDialog(true);
                           }}
                           disabled={isLoading || data.status === "COMPLETED"}
                         >
@@ -236,9 +242,7 @@ const SearchDocumentRequest = () => {
                         </Button>
                       </TableCell>
                       <TableCell>
-                        {data.changed_by_archivist_name
-                          ? data.changed_by_archivist_name
-                          : "Belum Diketahui"}
+                        {data.changed_by_archivist_name || "Belum Diketahui"}
                       </TableCell>
                       <TableCell>
                         {dayjs(data.changed_at).format("DD MMMM YYYY HH:mm:ss")}
@@ -251,13 +255,13 @@ const SearchDocumentRequest = () => {
                           onClick={() => {
                             const borrowerName = data.nama_pemilik;
                             const currentLoan = loanNoteData.find(
-                              (val) => val.nama_peminjam === borrowerName,
+                              (val) => val.nama_peminjam === borrowerName
                             );
 
                             if (!currentLoan) {
                               console.error(
                                 "Loan not found for borrower:",
-                                borrowerName,
+                                borrowerName
                               );
                               return;
                             }
@@ -280,9 +284,21 @@ const SearchDocumentRequest = () => {
                 )}
               </TableBody>
             </Table>
+
+            <TablePagination
+              component="div"
+              count={searchDocumentData.length}
+              page={page}
+              onPageChange={handleChangePage}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              rowsPerPageOptions={[5, 10, 25, 50]}
+              labelRowsPerPage="Baris per halaman:"
+            />
           </TableContainer>
         </Box>
       </Box>
+
       {showLoanNote && (
         <Box
           sx={{
@@ -295,14 +311,14 @@ const SearchDocumentRequest = () => {
             overflowY: "auto",
           }}
         >
-          {
-            <LoanNote
-              showLoanNoteHandler={setShowLoanNote}
-              loanNote={currentLoanNote!}
-            />
-          }
+          <LoanNote
+            showLoanNote={showLoanNote}
+            showLoanNoteHandler={showLoanNoteHandler}
+            loanNote={currentLoanNote!}
+          />
         </Box>
       )}
+
       {showConfirmDialog && (
         <ConfirmChangeStatusRequestDialog
           showDialog={showConfirmDialog}
@@ -311,24 +327,22 @@ const SearchDocumentRequest = () => {
           isLoading={isLoading}
         />
       )}
-      {showSnackbar && (
-        <Snackbar
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-          open={showSnackbar}
-          autoHideDuration={2500}
-          onClose={showSnackbarHandler}
-          message="Berhasil mengubah status request"
-        />
-      )}
-      {showNotification && (
-        <Snackbar
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-          open={showNotification}
-          autoHideDuration={2500}
-          onClose={showNotificationHandler}
-          message="Terdapat request pencarian berkas baru"
-        />
-      )}
+
+      <Snackbar
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        open={showSnackbar}
+        autoHideDuration={2500}
+        onClose={showSnackbarHandler}
+        message="Berhasil mengubah status request"
+      />
+
+      <Snackbar
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        open={showNotification}
+        autoHideDuration={2500}
+        onClose={showNotificationHandler}
+        message="Terdapat request pencarian berkas baru"
+      />
     </Fragment>
   );
 };

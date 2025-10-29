@@ -12,7 +12,7 @@ export type AuthContextType = {
   login: (
     username: string,
     password: string,
-    setError: Dispatch<SetStateAction<string>>,
+    setError: Dispatch<SetStateAction<string>>
   ) => void;
   logout: () => void;
 };
@@ -22,6 +22,7 @@ export type JwtPayload = {
   username: string;
   fullname: string;
   role: string;
+  exp: number;
 };
 
 export type TokenResponse = {

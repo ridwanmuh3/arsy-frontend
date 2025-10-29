@@ -1,69 +1,63 @@
-import type { AxiosError } from "axios";
+import axios from "axios";
 import { axiosInstance } from ".";
 import type { SearchDocumentSchema } from "../schemas/search-document";
 
 export const createSearchDocumentRequest = async (
-  searchDocument: SearchDocumentSchema,
+  searchDocument: SearchDocumentSchema
 ) => {
   try {
-    const {
-      data: { data },
-    } = await axiosInstance.post("/search-documents", searchDocument, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    return data;
+    const response = await axiosInstance.post(
+      "/search-documents",
+      searchDocument
+    );
+
+    return response.data.data;
   } catch (e: unknown) {
-    const err = e as AxiosError;
-    return err;
+    if (axios.isAxiosError(e)) {
+      const message = e.response?.data?.message || e.message;
+      throw new Error(message);
+    }
+    throw e;
   }
 };
 
 export const updateStatusSearchDocumentRequest = async (
-  searchDocument: SearchDocumentSchema,
+  searchDocument: SearchDocumentSchema
 ) => {
   try {
-    const {
-      data: { data },
-    } = await axiosInstance.put(
+    const response = await axiosInstance.put(
       `/search-documents/${searchDocument.id}`,
-      searchDocument,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
+      searchDocument
     );
-    return data;
+
+    return response.data.data;
   } catch (e: unknown) {
-    const err = e as AxiosError;
-    return err;
+    if (axios.isAxiosError(e)) {
+      const message = e.response?.data?.message || e.message;
+      throw new Error(message);
+    }
+    throw e;
   }
 };
 
 export const findAllSearchDocumentsRequest = async (
   offset: number = 0,
-  limit: number = 20,
+  limit: number = -1
 ) => {
   try {
-    const {
-      data: { data },
-    } = await axiosInstance.get(
-      `/search-documents?offset=${offset}&limit=${limit}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
+    const response = await axiosInstance.get("/search-documents", {
+      params: {
+        offset,
+        limit,
       },
-    );
+    });
 
-    return data;
+    return response.data.data;
   } catch (e: unknown) {
-    const err = e as AxiosError;
-    return err;
+    if (axios.isAxiosError(e)) {
+      const message = e.response?.data?.message || e.message;
+      throw new Error(message);
+    }
+    throw e;
   }
 };

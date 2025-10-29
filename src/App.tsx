@@ -1,7 +1,7 @@
 import { Route, Routes } from "react-router";
 import SearchDocumentRequest from "./pages/admin/SearchDocumentRequest";
 import History from "./pages/admin/History";
-import Document from "./pages/admin/Document";
+import ManageDocuments from "./pages/admin/ManageDocuments";
 import Login from "./pages/Login";
 import ManageUsers from "./pages/super-admin/ManageUsers";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -25,7 +25,7 @@ const App = () => {
               path="permintaan-berkas"
               element={<SearchDocumentRequest />}
             />
-            <Route path="berkas" element={<Document />} />
+            <Route path="berkas" element={<ManageDocuments />} />
           </Route>
           <Route
             element={

@@ -10,6 +10,7 @@ import {
   CircularProgress,
   Snackbar,
   IconButton,
+  TablePagination,
 } from "@mui/material";
 import { Fragment, useCallback, useEffect, useState } from "react";
 import { isAxiosError } from "axios";
@@ -39,6 +40,9 @@ const History = () => {
   const [historyData, setHistoryData] = useState<SearchDocumentSchema[]>([]);
   const [showSnackbar, setShowSnackbar] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [page, setPage] = useState<number>(0);
+  const [rowsPerPage, setRowsPerPage] = useState<number>(10);
+
   const user = getUserFromToken();
 
   const showSnackbarHandler = () => {
@@ -49,6 +53,7 @@ const History = () => {
     try {
       setIsLoading(true);
       const data = await findAllSearchDocumentsRequest();
+
       if (isAxiosError(data)) {
         console.error(data.code);
         if (historyData.length === 0) {
@@ -59,8 +64,7 @@ const History = () => {
 
       setHistoryData(data);
     } catch (error) {
-      const err = error as Error;
-      console.error(err.message);
+      console.error((error as Error).message);
     } finally {
       setIsLoading(false);
     }
@@ -70,27 +74,44 @@ const History = () => {
     fetchData();
   }, []);
 
+  // Filter data sesuai user (LOCKET hanya melihat request sendiri)
   const currentHistoryForUser =
     historyData && historyData.length > 0 && user?.role === "LOCKET"
-      ? historyData.filter((d) => d.created_by_user_id === user?.sub)
+      ? historyData.filter((d) => d.created_by_user_id === user?.id)
       : historyData;
+
+  // Data untuk halaman saat ini
+  const paginatedData = currentHistoryForUser.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
+
+  // Handler pagination
+  const handleChangePage = (_: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   return (
     <Fragment>
-      <Box
-        sx={{
-          paddingLeft: "17rem",
-          paddingBottom: "2rem",
-        }}
-      >
+      <Box sx={{ paddingLeft: "17rem", paddingBottom: "2rem" }}>
         <Box
           sx={{
             paddingX: "2rem",
-            paddingY: "0.5rem",
+            display: "flex",
+            flexDirection: "column",
+            gap: "1.2rem",
           }}
         >
           <Box
             sx={{
+              paddingTop: "0.8rem",
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
@@ -99,23 +120,15 @@ const History = () => {
           >
             <h1>Riwayat Permintaan Pencarian Berkas</h1>
             <IconButton
-              sx={{
-                height: "2.5rem",
-              }}
+              sx={{ height: "2.5rem" }}
               title="Refresh"
-              onClick={() => {
-                fetchData();
-              }}
+              onClick={() => fetchData()}
             >
               <Refresh color="primary" />
             </IconButton>
           </Box>
 
-          <TableContainer
-            sx={{
-              boxShadow: 1,
-            }}
-          >
+          <TableContainer sx={{ boxShadow: 1 }}>
             <Table>
               <TableHead>
                 <TableRow>
@@ -124,16 +137,15 @@ const History = () => {
                   ))}
                 </TableRow>
               </TableHead>
+
               <TableBody>
-                {currentHistoryForUser && currentHistoryForUser.length > 0 ? (
-                  currentHistoryForUser.map((data, index) => (
+                {paginatedData && paginatedData.length > 0 ? (
+                  paginatedData.map((data, index) => (
                     <TableRow
                       key={data.nomor_berkas}
-                      sx={{
-                        "&:last-child td, &:last-child th": { border: 0 },
-                      }}
+                      sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                     >
-                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>{page * rowsPerPage + index + 1}</TableCell>
                       <TableCell>{data.nama_pemilik}</TableCell>
                       <TableCell>{data.nomor_berkas}</TableCell>
                       <TableCell>{data.desa}</TableCell>
@@ -151,8 +163,8 @@ const History = () => {
                               data.status === "PENDING"
                                 ? grey[100]
                                 : data.status === "APPROVED"
-                                  ? blue[100]
-                                  : green[100],
+                                ? blue[100]
+                                : green[100],
                             color: grey[800],
                           }}
                           label={data.status}
@@ -177,9 +189,22 @@ const History = () => {
                 )}
               </TableBody>
             </Table>
+
+            {/* 🔽 Tambahkan Pagination di bawah tabel */}
+            <TablePagination
+              component="div"
+              count={currentHistoryForUser.length}
+              page={page}
+              onPageChange={handleChangePage}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              rowsPerPageOptions={[5, 10, 25, 50]}
+              labelRowsPerPage="Baris per halaman:"
+            />
           </TableContainer>
         </Box>
       </Box>
+
       {showSnackbar && (
         <Snackbar
           anchorOrigin={{ vertical: "bottom", horizontal: "center" }}

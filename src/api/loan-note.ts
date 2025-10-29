@@ -1,58 +1,53 @@
-import type { AxiosError } from "axios";
+import axios from "axios";
 import { axiosInstance } from ".";
 import type { LoanNoteSchema } from "../schemas/loan-note";
 
 export const createLoanNote = async (loanNote: LoanNoteSchema) => {
   try {
-    const {
-      data: { data },
-    } = await axiosInstance.post("/loan-notes", loanNote, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    return data;
+    const response = await axiosInstance.post("/loan-notes", loanNote);
+
+    return response.data.data;
   } catch (e: unknown) {
-    const err = e as AxiosError;
-    return err;
+    if (axios.isAxiosError(e)) {
+      const message = e.response?.data?.message || e.message;
+      throw new Error(message);
+    }
+    throw e;
   }
 };
 
 export const updateLoanNote = async (loanNote: LoanNoteSchema) => {
   try {
-    const {
-      data: { data },
-    } = await axiosInstance.put("/loan-notes", loanNote, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    return data;
+    const response = await axiosInstance.put("/loan-notes", loanNote);
+
+    return response.data.data;
   } catch (e: unknown) {
-    const err = e as AxiosError;
-    return err;
+    if (axios.isAxiosError(e)) {
+      const message = e.response?.data?.message || e.message;
+      throw new Error(message);
+    }
+    throw e;
   }
 };
 
 export const findAllLoanNotes = async (
   offset: number = 0,
-  limit: number = 20,
+  limit: number = -1
 ) => {
   try {
-    const {
-      data: { data },
-    } = await axiosInstance.get(`/loan-notes?offset=${offset}&limit=${limit}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await axiosInstance.get("/loan-notes", {
+      params: {
+        offset,
+        limit,
       },
     });
 
-    return data;
+    return response.data.data;
   } catch (e: unknown) {
-    const err = e as AxiosError;
-    return err;
+    if (axios.isAxiosError(e)) {
+      const message = e.response?.data?.message || e.message;
+      throw new Error(message);
+    }
+    throw e;
   }
 };

@@ -60,8 +60,12 @@ const CreateSearchDocumentRequest = () => {
     }
   };
 
+  const showLoanNoteHandler = () => {
+    setShowLoanNote((prev) => !prev);
+  };
+
   const showSnackbarHandler = () => {
-    setShowSnackbar(false);
+    setShowSnackbar((prev) => !prev);
   };
 
   return (
@@ -195,7 +199,7 @@ const CreateSearchDocumentRequest = () => {
                 disabled={isLoading}
                 fullWidth
               >
-                Buat Nota
+                Buat Permintaan
               </Button>
             </FormControl>
           </Box>
@@ -223,7 +227,7 @@ const CreateSearchDocumentRequest = () => {
           }}
         >
           <LoanNote
-            showLoanNoteHandler={setShowLoanNote}
+            showLoanNoteHandler={showLoanNoteHandler}
             loanNote={loanNoteData}
           />
         </Box>

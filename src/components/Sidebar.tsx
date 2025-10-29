@@ -144,7 +144,7 @@ const Sidebar = () => {
                   />
                 </ListItemButton>
               </ListItem>
-            ) : null,
+            ) : null
           )}
         </List>
         <Divider />

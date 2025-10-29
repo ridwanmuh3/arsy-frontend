@@ -1,27 +1,34 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   FormControl,
+  FormHelperText,
   InputLabel,
   MenuItem,
   Select,
+  Stack,
   TextField,
 } from "@mui/material";
-import { red } from "@mui/material/colors";
-import { Fragment, type MouseEvent } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { userSchema, type UserSchema } from "../../schemas/user";
+import type { MouseEvent } from "react";
 
 type Props = {
   showDialog: boolean;
   showDialogHandler: (e: MouseEvent) => void;
-  addUserHandler: (data: UserSchema) => void;
+  addUserHandler: (data: UserSchema) => Promise<void>;
   isLoading: boolean;
+};
+
+const defaultValues: UserSchema = {
+  username: "",
+  fullname: "",
+  password: "",
+  role: "LOCKET",
 };
 
 const AddUserDialog = ({
@@ -30,124 +37,111 @@ const AddUserDialog = ({
   addUserHandler,
   isLoading,
 }: Props) => {
-  const form = useForm({ resolver: zodResolver(userSchema) });
+  const {
+    control,
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<UserSchema>({
+    resolver: zodResolver(userSchema),
+    defaultValues: defaultValues,
+  });
 
-  const submitHandler = (data: UserSchema) => {
-    addUserHandler(data);
+  const submitHandler = async (data: UserSchema) => {
+    try {
+      await addUserHandler(data);
+      reset();
+    } catch (error) {
+      console.error("Gagal menambah pengguna:", error);
+    }
+  };
+
+  const handleClose = (e: MouseEvent) => {
+    showDialogHandler(e);
+    reset();
   };
 
   return (
-    <Fragment>
-      <form onSubmit={form.handleSubmit(submitHandler)} autoComplete="off">
-        <Dialog
-          fullWidth
-          maxWidth="xs"
-          open={showDialog}
-          onClose={showDialogHandler}
-          disablePortal
-        >
-          <DialogTitle align="left" fontSize="2rem" id="add-user">
-            Tambah Pengguna
-          </DialogTitle>
-          <DialogContent>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "1.5rem",
-                paddingY: "0.5rem",
-              }}
-            >
-              <FormControl>
-                <TextField
-                  type="text"
-                  variant="outlined"
-                  id="username"
-                  label="Username"
-                  {...form.register("username")}
-                />
-                {form.formState.errors.username ? (
-                  <span
-                    style={{
-                      color: red[500],
-                      marginTop: "0.7rem",
-                      textAlign: "center",
-                    }}
-                  >
-                    {form.formState.errors.username.message}
-                  </span>
-                ) : null}
-              </FormControl>
-              <FormControl>
-                <TextField
-                  type="text"
-                  variant="outlined"
-                  id="fullname"
-                  label="Fullname"
-                  {...form.register("fullname")}
-                />
-                {form.formState.errors.fullname ? (
-                  <span
-                    style={{
-                      color: red[500],
-                      marginTop: "0.7rem",
-                      textAlign: "center",
-                    }}
-                  >
-                    {form.formState.errors.fullname.message}
-                  </span>
-                ) : null}
-              </FormControl>
-              <FormControl>
-                <TextField
-                  type="password"
-                  variant="outlined"
-                  id="password"
-                  label="Password"
-                  {...form.register("password")}
-                />
-                {form.formState.errors.password ? (
-                  <span
-                    style={{
-                      color: red[500],
-                      marginTop: "0.7rem",
-                      textAlign: "center",
-                    }}
-                  >
-                    {form.formState.errors.password.message}
-                  </span>
-                ) : null}
-              </FormControl>
-              <FormControl>
-                <InputLabel id="user-role">Role</InputLabel>
-                <Select
-                  labelId="user-role"
-                  label="Role"
-                  defaultValue={"LOCKET"}
-                  {...form.register("role")}
-                >
-                  <MenuItem value={"LOCKET"}>Locket</MenuItem>
-                  <MenuItem value={"ADMIN"}>Admin</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </DialogContent>
-          <DialogActions>
-            <Button variant="outlined" onClick={showDialogHandler}>
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              autoFocus
-              disabled={isLoading}
-            >
-              Create
-            </Button>
-          </DialogActions>
-        </Dialog>
+    <Dialog
+      fullWidth
+      maxWidth="xs"
+      open={showDialog}
+      onClose={handleClose}
+      disablePortal
+    >
+      <form
+        onSubmit={handleSubmit(submitHandler)}
+        autoComplete="off"
+        noValidate
+      >
+        <DialogTitle align="left" fontSize="2rem" id="add-user">
+          Tambah Pengguna
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={3} sx={{ paddingTop: "0.5rem" }}>
+            <TextField
+              type="text"
+              variant="outlined"
+              id="username"
+              label="Username"
+              {...register("username")}
+              error={!!errors.username}
+              helperText={errors.username?.message}
+            />
+
+            <TextField
+              type="text"
+              variant="outlined"
+              id="fullname"
+              label="Fullname"
+              {...register("fullname")}
+              error={!!errors.fullname}
+              helperText={errors.fullname?.message}
+            />
+
+            <TextField
+              type="password"
+              variant="outlined"
+              id="password"
+              label="Password"
+              {...register("password")}
+              error={!!errors.password}
+              helperText={errors.password?.message}
+            />
+            <Controller
+              name="role"
+              control={control}
+              render={({ field }) => (
+                <FormControl fullWidth error={!!errors.role}>
+                  <InputLabel id="user-role">Role</InputLabel>
+                  <Select labelId="user-role" label="Role" {...field}>
+                    <MenuItem value={"LOCKET"}>Locket</MenuItem>
+                    <MenuItem value={"ADMIN"}>Admin</MenuItem>
+                  </Select>
+                  {errors.role && (
+                    <FormHelperText>{errors.role.message}</FormHelperText>
+                  )}
+                </FormControl>
+              )}
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="outlined" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            autoFocus
+            disabled={isLoading}
+          >
+            Create
+          </Button>
+        </DialogActions>
       </form>
-    </Fragment>
+    </Dialog>
   );
 };
 

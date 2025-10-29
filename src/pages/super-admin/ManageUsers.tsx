@@ -3,13 +3,13 @@ import {
   Box,
   Button,
   CircularProgress,
-  Pagination,
   Snackbar,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
+  TablePagination,
   TableRow,
 } from "@mui/material";
 import {
@@ -17,12 +17,15 @@ import {
   useCallback,
   useEffect,
   useState,
-  type ChangeEvent,
   type MouseEvent,
 } from "react";
+import dayjs from "dayjs";
+import { isAxiosError } from "axios";
+
 import DeleteUserDialog from "../../components/super-admin/DeleteUserDialog";
 import AddUserDialog from "../../components/super-admin/AddUserDialog";
 import EditUserDialog from "../../components/super-admin/EditUserDialog";
+
 import type { UserSchema } from "../../schemas/user";
 import {
   deleteUser,
@@ -30,8 +33,6 @@ import {
   registerUser,
   updateUser,
 } from "../../api/users";
-import { isAxiosError } from "axios";
-import dayjs from "dayjs";
 
 const tableColumns = [
   "No",
@@ -43,293 +44,216 @@ const tableColumns = [
   "Action",
 ];
 
+const emptyUser: UserSchema = {
+  id: "",
+  username: "",
+  fullname: "",
+  role: "",
+  password: "",
+  created_at: "",
+  updated_at: "",
+};
+
 const ManageUsers = () => {
   const [users, setUsers] = useState<UserSchema[]>([]);
-  const [userID, setUserID] = useState<string>("");
-  const [user, setUser] = useState<UserSchema>({
-    username: "",
-    role: "",
-    fullname: "",
-    password: "",
-    created_at: "",
-    updated_at: "",
-    id: "",
-  });
-  const [page, setPage] = useState<number>(1);
-  const [showAddUserDialog, setShowAddUserDialog] = useState<boolean>(false);
-  const [showEditUserDialog, setShowEditUserDialog] = useState<boolean>(false);
-  const [showDeleteUserDialog, setShowDeleteUserDialog] =
-    useState<boolean>(false);
-  const [showSnackbar, setShowSnackbar] = useState<boolean>(false);
-  const [snackbarMessage, setSnackbarMessage] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [selectedUser, setSelectedUser] = useState<UserSchema>(emptyUser);
+  const [selectedUserID, setSelectedUserID] = useState<string>("");
 
-  const changePageIndexHandler = (_: ChangeEvent<unknown>, value: number) => {
-    setPage(value);
-  };
+  const [isLoading, setIsLoading] = useState(false);
 
-  const showAddUserDialogHandler = (e: MouseEvent) => {
-    e.preventDefault();
-    setShowAddUserDialog((prevState) => !prevState);
-  };
-  const showEditUserDialogHandler = (e: MouseEvent) => {
-    e.preventDefault();
-    setShowEditUserDialog((prevState) => !prevState);
-  };
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  const showDeleteUserDialogHandler = (e: MouseEvent) => {
-    e.preventDefault();
-    setShowDeleteUserDialog((prevState) => !prevState);
-  };
+  const [snackbar, setSnackbar] = useState({ open: false, message: "" });
 
-  const showSnackbarHandler = () => {
-    setShowSnackbar((prevState) => !prevState);
-  };
-
-  const addUserHandler = async (user: UserSchema) => {
-    try {
-      setSnackbarMessage("");
-      setIsLoading(true);
-      const result = await registerUser(user);
-      if (isAxiosError(result)) {
-        console.error(result.code);
-        if (users.length === 0) {
-          setUsers([]);
-        }
-        return;
-      }
-
-      const fetchedUsers = await findAllUsers();
-      if (isAxiosError(fetchedUsers)) {
-        console.error(fetchedUsers.code);
-        if (users.length === 0) {
-          setUsers([]);
-        }
-        return;
-      }
-
-      setSnackbarMessage("Berhasil menambah user");
-      setUsers(fetchedUsers);
-      setShowSnackbar(true);
-      setShowAddUserDialog((prevState) => !prevState);
-    } catch (err: unknown) {
-      const e = err as Error;
-      console.error(e.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // TODO: Edit User Logic
-  const editUserHandler = async (updatedUser: UserSchema) => {
-    try {
-      setSnackbarMessage("");
-      setIsLoading(true);
-      const result = await updateUser(updatedUser);
-      if (isAxiosError(result)) {
-        console.error(result.code);
-        if (users.length === 0) {
-          setUsers([]);
-        }
-        return;
-      }
-
-      const fetchedUsers = await findAllUsers();
-      if (isAxiosError(fetchedUsers)) {
-        console.error(fetchedUsers.code);
-        if (users.length === 0) {
-          setUsers([]);
-        }
-        return;
-      }
-
-      setSnackbarMessage("Berhasil mengubah user");
-      setUsers(fetchedUsers);
-      setUser({
-        username: "",
-        role: "",
-        fullname: "",
-        password: "",
-        created_at: "",
-        updated_at: "",
-        id: "",
-      });
-      setShowSnackbar(true);
-      setShowEditUserDialog((prevState) => !prevState);
-    } catch (err) {
-      const e = err as Error;
-      console.log(e.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const deleteUserHandler = async (userID: string) => {
-    try {
-      setSnackbarMessage("");
-      setIsLoading(true);
-      const result = await deleteUser(userID);
-      if (isAxiosError(result)) {
-        console.error(result.code);
-        setUsers([]);
-        return;
-      }
-
-      const fetchedUsers = await findAllUsers();
-      if (isAxiosError(fetchedUsers)) {
-        console.error(fetchedUsers.code);
-        setUsers([]);
-        return;
-      }
-
-      setSnackbarMessage("Berhasil menghapus user");
-      setUsers(fetchedUsers);
-      setUserID("");
-      setShowSnackbar(true);
-      setShowDeleteUserDialog((prevState) => !prevState);
-    } catch (err) {
-      const e = err as Error;
-      console.error(e.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const usersPerPage = 10;
-  const indexOfLast = page * usersPerPage;
-  const indexOfFirst = indexOfLast - usersPerPage;
-  const currentUsers = users
-    ? users
-        .filter((user: UserSchema) => user.role !== "SUPER_ADMIN")
-        .slice(indexOfFirst, indexOfLast)
-    : [];
-  const totalPages = Math.ceil(users.length / usersPerPage);
+  const [page, setPage] = useState<number>(0);
+  const [rowsPerPage, setRowsPerPage] = useState<number>(10);
 
   const fetchUsers = useCallback(async () => {
     try {
       setIsLoading(true);
-      const fetchedUsers = await findAllUsers();
-      if (isAxiosError(fetchedUsers)) {
-        console.error(fetchedUsers.code);
-        if (users.length === 0) {
-          setUsers([]);
-        }
+      const response = await findAllUsers();
+
+      if (isAxiosError(response)) {
+        console.error(response.code);
+        setUsers([]);
         return;
       }
 
-      setUsers(fetchedUsers);
+      setUsers(response);
     } catch (err) {
-      const e = err as Error;
-      console.error(e.message);
+      console.error((err as Error).message);
     } finally {
       setIsLoading(false);
     }
-  }, [users]);
-
-  useEffect(() => {
-    if (page > 1 && users.length <= usersPerPage) {
-      setPage((prevPage) => prevPage - 1);
-    }
-  }, [page, users]);
+  }, []);
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [fetchUsers]);
+
+  const refreshUsersAfterAction = async (message: string) => {
+    await fetchUsers();
+    setSnackbar({ open: true, message });
+  };
+
+  const addUserHandler = async (user: UserSchema) => {
+    try {
+      setIsLoading(true);
+      const result = await registerUser(user);
+
+      if (isAxiosError(result)) {
+        console.error(result.code);
+        return;
+      }
+
+      await refreshUsersAfterAction("Berhasil menambah pengguna");
+      setShowAddDialog(false);
+    } catch (err) {
+      console.error((err as Error).message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const editUserHandler = async (user: UserSchema) => {
+    try {
+      setIsLoading(true);
+      const result = await updateUser(user);
+
+      if (isAxiosError(result)) {
+        console.error(result.code);
+        return;
+      }
+
+      await refreshUsersAfterAction("Berhasil mengubah pengguna");
+      setShowEditDialog(false);
+      setSelectedUser(emptyUser);
+    } catch (err) {
+      console.error((err as Error).message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const deleteUserHandler = async (id: string) => {
+    try {
+      setIsLoading(true);
+      const result = await deleteUser(id);
+
+      if (isAxiosError(result)) {
+        console.error(result.code);
+        return;
+      }
+
+      await refreshUsersAfterAction("Berhasil menghapus pengguna");
+      setShowDeleteDialog(false);
+      setSelectedUserID("");
+    } catch (err) {
+      console.error((err as Error).message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const handleChangePage = (_: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const toggleAddDialog = (e: MouseEvent) => {
+    e.preventDefault();
+    setShowAddDialog((prev) => !prev);
+  };
+
+  const toggleEditDialog = (e: MouseEvent) => {
+    e.preventDefault();
+    setShowEditDialog((prev) => !prev);
+  };
+
+  const toggleDeleteDialog = (e: MouseEvent) => {
+    e.preventDefault();
+    setShowDeleteDialog((prev) => !prev);
+  };
+
+  const handleSnackbarClose = () =>
+    setSnackbar((prev) => ({ ...prev, open: false }));
+
+  const paginatedData = users.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
 
   return (
     <Fragment>
-      <Box
-        sx={{
-          paddingLeft: "17rem",
-          paddingBottom: "2rem",
-        }}
-      >
+      <Box sx={{ pl: "17rem", pb: "2rem" }}>
         <Box
           sx={{
-            paddingX: "2rem",
+            px: "2rem",
             display: "flex",
             flexDirection: "column",
-            gap: "1.8rem",
+            gap: "1.2rem",
           }}
         >
           <Box
             sx={{
-              paddingTop: "2rem",
+              pt: "1.2rem",
               display: "flex",
-              gap: "4rem",
               justifyContent: "space-between",
+              alignItems: "center",
+              gap: "2rem",
             }}
           >
-            <h1
-              style={{
-                lineHeight: 0,
-              }}
-            >
-              Kelola Pengguna
-            </h1>
+            <h1>Kelola Pengguna</h1>
             <Button
               variant="contained"
               color="primary"
               startIcon={<Add />}
-              onClick={showAddUserDialogHandler}
+              sx={{ height: "3rem" }}
+              onClick={toggleAddDialog}
             >
               Tambah Pengguna
             </Button>
           </Box>
-          <TableContainer
-            sx={{
-              boxShadow: 1,
-            }}
-          >
+
+          <TableContainer sx={{ boxShadow: 1 }}>
             <Table>
               <TableHead>
                 <TableRow>
-                  {tableColumns.map((name) => (
-                    <TableCell key={name}>{name}</TableCell>
+                  {tableColumns.map((col) => (
+                    <TableCell key={col}>{col}</TableCell>
                   ))}
                 </TableRow>
               </TableHead>
               <TableBody>
-                {currentUsers.length > 0 ? (
-                  currentUsers.map((data, index) => (
-                    <TableRow
-                      key={data.id}
-                      sx={{
-                        "&:last-child td, &:last-child th": { border: 0 },
-                      }}
-                    >
-                      <TableCell>{index + 1 + indexOfFirst}</TableCell>
-                      <TableCell>{data.username}</TableCell>
-                      <TableCell>{data.fullname}</TableCell>
-                      <TableCell>{data.role}</TableCell>
+                {paginatedData && paginatedData.length > 0 ? (
+                  paginatedData.map((user, index) => (
+                    <TableRow key={user.id}>
+                      <TableCell>{page * rowsPerPage + index + 1}</TableCell>
+                      <TableCell>{user.username}</TableCell>
+                      <TableCell>{user.fullname}</TableCell>
+                      <TableCell>{user.role}</TableCell>
                       <TableCell>
-                        {dayjs(data.created_at).format("DD MMMM YYYY HH:mm:ss")}
+                        {dayjs(user.created_at).format("DD MMMM YYYY HH:mm:ss")}
                       </TableCell>
                       <TableCell>
-                        {dayjs(data.updated_at).format("DD MMMM YYYY HH:mm:ss")}
+                        {dayjs(user.updated_at).format("DD MMMM YYYY HH:mm:ss")}
                       </TableCell>
-                      <TableCell
-                        sx={{
-                          display: "flex",
-                          gap: "1rem",
-                        }}
-                      >
+                      <TableCell sx={{ display: "flex", gap: "1rem" }}>
                         <Button
                           variant="contained"
                           color="warning"
                           startIcon={<ModeEdit />}
-                          onClick={(e: MouseEvent) => {
-                            setUser({
-                              username: data.username,
-                              role: data.role,
-                              fullname: data.fullname,
-                              password: data.password,
-                              created_at: data.created_at,
-                              updated_at: data.updated_at,
-                              id: data.id,
-                            });
-                            setUserID(data.id!);
-                            showEditUserDialogHandler(e);
+                          onClick={(e) => {
+                            setSelectedUser(user);
+                            toggleEditDialog(e);
                           }}
                         >
                           Edit
@@ -338,9 +262,9 @@ const ManageUsers = () => {
                           variant="contained"
                           color="error"
                           startIcon={<Delete />}
-                          onClick={(e: MouseEvent) => {
-                            setUserID(data.id!);
-                            showDeleteUserDialogHandler(e);
+                          onClick={(e) => {
+                            setSelectedUserID(user.id!);
+                            toggleDeleteDialog(e);
                           }}
                         >
                           Hapus
@@ -357,53 +281,56 @@ const ManageUsers = () => {
                 )}
               </TableBody>
             </Table>
+            <TablePagination
+              component="div"
+              count={users.length}
+              page={page}
+              onPageChange={handleChangePage}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              rowsPerPageOptions={[5, 10, 25, 50]}
+              labelRowsPerPage="Baris per halaman:"
+            />
           </TableContainer>
-          <Box>
-            {currentUsers.length > 0 ? (
-              <Pagination
-                count={totalPages}
-                page={page}
-                onChange={changePageIndexHandler}
-              />
-            ) : null}
-          </Box>
         </Box>
       </Box>
-      {showAddUserDialog && (
+
+      {/* Dialogs */}
+      {showAddDialog && (
         <AddUserDialog
-          showDialog={showAddUserDialog}
-          showDialogHandler={showAddUserDialogHandler}
+          showDialog={showAddDialog}
+          showDialogHandler={toggleAddDialog}
           addUserHandler={addUserHandler}
           isLoading={isLoading}
         />
       )}
-      {showEditUserDialog && (
+      {showEditDialog && (
         <EditUserDialog
-          showDialog={showEditUserDialog}
-          showDialogHandler={showEditUserDialogHandler}
+          showDialog={showEditDialog}
+          showDialogHandler={toggleEditDialog}
           editUserHandler={editUserHandler}
-          user={user}
+          user={selectedUser}
           isLoading={isLoading}
         />
       )}
-      {showDeleteUserDialog && (
+      {showDeleteDialog && (
         <DeleteUserDialog
-          showDialog={showDeleteUserDialog}
-          showDialogHandler={showDeleteUserDialogHandler}
+          showDialog={showDeleteDialog}
+          showDialogHandler={toggleDeleteDialog}
           deleteUserHandler={deleteUserHandler}
-          userID={userID}
+          userID={selectedUserID}
           isLoading={isLoading}
         />
       )}
-      {showSnackbar && (
-        <Snackbar
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-          open={showSnackbar}
-          autoHideDuration={2500}
-          onClose={showSnackbarHandler}
-          message={snackbarMessage}
-        />
-      )}
+
+      {/* Snackbar */}
+      <Snackbar
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        open={snackbar.open}
+        autoHideDuration={2500}
+        onClose={handleSnackbarClose}
+        message={snackbar.message}
+      />
     </Fragment>
   );
 };

@@ -6,9 +6,7 @@ import {
   DialogContentText,
   DialogTitle,
 } from "@mui/material";
-import { red } from "@mui/material/colors";
-import { type MouseEvent } from "react";
-import { Fragment } from "react/jsx-runtime";
+import type { MouseEvent } from "react";
 
 type Props = {
   showDialog: boolean;
@@ -26,33 +24,27 @@ const DeleteUserDialog = ({
   isLoading,
 }: Props) => {
   return (
-    <Fragment>
-      <Dialog open={showDialog} onClose={showDialogHandler}>
-        <DialogTitle id="delete-user">Hapus Pengguna</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="delete-user-dialog">
-            Apakah anda yakin ingin menghapus pengguna ?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button variant="outlined" onClick={showDialogHandler}>
-            Cancel
-          </Button>
-          <Button
-            sx={{
-              backgroundColor: red[400],
-            }}
-            variant="contained"
-            onClick={() => {
-              deleteUserHandler(userID);
-            }}
-            disabled={isLoading}
-          >
-            Hapus
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Fragment>
+    <Dialog open={showDialog} onClose={showDialogHandler}>
+      <DialogTitle id="delete-user">Hapus Pengguna</DialogTitle>
+      <DialogContent>
+        <DialogContentText id="delete-user-dialog">
+          Apakah anda yakin ingin menghapus pengguna ?
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button variant="outlined" onClick={showDialogHandler}>
+          Cancel
+        </Button>
+        <Button
+          color="error"
+          variant="contained"
+          onClick={() => deleteUserHandler(userID)}
+          disabled={isLoading}
+        >
+          Hapus
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 

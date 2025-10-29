@@ -1,42 +1,40 @@
-import type { AxiosError } from "axios";
+import axios from "axios";
 import { axiosInstance } from ".";
 import type { DocumentSchema } from "../schemas/document";
 
 export const addDocument = async (document: DocumentSchema) => {
   try {
-    const {
-      data: { data },
-    } = await axiosInstance.post("/documents", document, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await axiosInstance.post("/documents", document);
 
-    return data;
+    return response.data.data;
   } catch (e: unknown) {
-    const err = e as AxiosError;
-    return err;
+    if (axios.isAxiosError(e)) {
+      const message = e.response?.data?.message || e.message;
+      throw new Error(message);
+    }
+
+    throw e;
   }
 };
 
 export const findAllDocuments = async (
   offset: number = 0,
-  limit: number = 20,
+  limit: number = -1
 ) => {
   try {
-    const {
-      data: { data },
-    } = await axiosInstance.get(`/documents?offset=${offset}&limit=${limit}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await axiosInstance.get("/documents", {
+      params: {
+        offset,
+        limit,
       },
     });
 
-    return data;
+    return response.data.data;
   } catch (e: unknown) {
-    const err = e as AxiosError;
-    return err;
+    if (axios.isAxiosError(e)) {
+      const message = e.response?.data?.message || e.message;
+      throw new Error(message);
+    }
+    throw e;
   }
 };
