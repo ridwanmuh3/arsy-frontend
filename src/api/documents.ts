@@ -1,5 +1,4 @@
-import axios from "axios";
-import { axiosInstance } from ".";
+import { axiosInstance, getApiErrorMessage } from ".";
 import type { DocumentSchema } from "../schemas/document";
 
 export const addDocument = async (document: DocumentSchema) => {
@@ -8,12 +7,7 @@ export const addDocument = async (document: DocumentSchema) => {
 
     return response.data.data;
   } catch (e: unknown) {
-    if (axios.isAxiosError(e)) {
-      const message = e.response?.data?.message || e.message;
-      throw new Error(message);
-    }
-
-    throw e;
+    throw new Error(getApiErrorMessage(e));
   }
 };
 
@@ -31,10 +25,6 @@ export const findAllDocuments = async (
 
     return response.data.data;
   } catch (e: unknown) {
-    if (axios.isAxiosError(e)) {
-      const message = e.response?.data?.message || e.message;
-      throw new Error(message);
-    }
-    throw e;
+    throw new Error(getApiErrorMessage(e));
   }
 };

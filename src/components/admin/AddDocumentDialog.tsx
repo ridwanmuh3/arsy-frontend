@@ -15,7 +15,7 @@ import type { MouseEvent } from "react";
 type Props = {
   showDialog: boolean;
   showDialogHandler: (e: MouseEvent) => void;
-  addDocumentHandler: (data: DocumentSchema) => void;
+  addDocumentHandler: (data: DocumentSchema) => Promise<boolean>;
   isLoading: boolean;
 };
 
@@ -36,9 +36,11 @@ const AddDocumentDialog = ({
     },
   });
 
-  const submitHandler = (data: DocumentSchema) => {
-    addDocumentHandler(data);
-    form.reset();
+  const submitHandler = async (data: DocumentSchema) => {
+    const ok = await addDocumentHandler(data);
+    if (ok) {
+      form.reset();
+    }
   };
 
   const handleClose = (e: MouseEvent) => {
@@ -116,7 +118,7 @@ const AddDocumentDialog = ({
         </DialogContent>
         <DialogActions>
           <Button variant="outlined" onClick={handleClose}>
-            Cancel
+            Batal
           </Button>
           <Button
             type="submit"
@@ -124,7 +126,7 @@ const AddDocumentDialog = ({
             autoFocus
             disabled={isLoading}
           >
-            Create
+            Simpan
           </Button>
         </DialogActions>
       </form>

@@ -13,6 +13,7 @@ export const getUserFromToken = () => {
 
     if (decoded && decoded.exp * 1000 < Date.now()) {
       localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
       return null;
     }
 
@@ -25,6 +26,7 @@ export const getUserFromToken = () => {
   } catch (error) {
     console.error("Failed to decode token:", error);
     localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
     return null;
   }
 };

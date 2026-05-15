@@ -8,7 +8,6 @@ import type { AuthProps, AuthToken } from "../types";
 import { AuthContext } from "../stores/auth";
 import { useNavigate } from "react-router";
 import { loginUser } from "../api/auth";
-import { isAxiosError } from "axios";
 import { getUserFromToken } from "../lib/auth";
 
 export const AuthProvider = ({ children }: AuthProps) => {
@@ -68,27 +67,11 @@ export const AuthProvider = ({ children }: AuthProps) => {
             navigate("/users");
           }
         } catch (e: unknown) {
-          let errorMessage = "Terjadi kesalahan tidak diketahui.";
-
-          if (isAxiosError(e) && e.response) {
-            switch (e.response.status) {
-              case 400:
-                errorMessage = "Username atau password tidak valid";
-                break;
-              case 404:
-                errorMessage = "Akun pengguna tidak ditemukan";
-                break;
-              case 500:
-                errorMessage = "Terjadi kesalahan di server";
-                break;
-              default:
-                errorMessage = e.response.data?.message || e.message;
-            }
-          } else if (e instanceof Error) {
-            errorMessage = e.message;
-          }
-
-          setError(errorMessage);
+          setError(
+            e instanceof Error
+              ? e.message
+              : "Terjadi kesalahan tidak diketahui."
+          );
         }
       },
       logout: () => {

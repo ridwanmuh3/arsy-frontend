@@ -1,5 +1,6 @@
 import { Add } from "@mui/icons-material";
 import {
+  Alert,
   Box,
   Button,
   CircularProgress,
@@ -19,7 +20,6 @@ import {
   useState,
   type MouseEvent,
 } from "react";
-import { isAxiosError } from "axios";
 import AddDocumentDialog from "../../components/admin/AddDocumentDialog";
 import type { DocumentSchema } from "../../schemas/document";
 import { addDocument, findAllDocuments } from "../../api/documents";
@@ -39,6 +39,9 @@ const ManageDocuments = () => {
   const [showAddDialog, setShowAddDialog] = useState<boolean>(false);
   const [showSnackbar, setShowSnackbar] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<
+    "success" | "error"
+  >("success");
 
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
@@ -63,30 +66,27 @@ const ManageDocuments = () => {
     setPage(newPage);
   };
 
-  const handleAddDocument = async (document: DocumentSchema) => {
+  const handleAddDocument = async (
+    document: DocumentSchema
+  ): Promise<boolean> => {
     try {
       setIsLoading(true);
       setSnackbarMessage("");
 
-      const result = await addDocument(document);
-      if (isAxiosError(result)) {
-        console.error(result.code);
-        return;
-      }
-
+      await addDocument(document);
       const fetched = await findAllDocuments();
-      if (isAxiosError(fetched)) {
-        console.error(fetched.code);
-        return;
-      }
-
       setDocuments(fetched);
+      setSnackbarSeverity("success");
       setSnackbarMessage("Berkas berhasil ditambahkan");
       setShowSnackbar(true);
       setShowAddDialog(false);
+      return true;
     } catch (error) {
       const err = error as Error;
-      console.error(err.message);
+      setSnackbarSeverity("error");
+      setSnackbarMessage(err.message);
+      setShowSnackbar(true);
+      return false;
     } finally {
       setIsLoading(false);
     }
@@ -96,17 +96,13 @@ const ManageDocuments = () => {
     try {
       setIsLoading(true);
       const fetched = await findAllDocuments();
-
-      if (isAxiosError(fetched)) {
-        console.error(fetched.code);
-        setDocuments([]);
-        return;
-      }
-
       setDocuments(fetched);
     } catch (error) {
       const err = error as Error;
-      console.error(err.message);
+      setSnackbarSeverity("error");
+      setSnackbarMessage(err.message);
+      setShowSnackbar(true);
+      setDocuments([]);
     } finally {
       setIsLoading(false);
     }
@@ -148,6 +144,7 @@ const ManageDocuments = () => {
               startIcon={<Add />}
               sx={{ height: "3rem" }}
               onClick={toggleAddDialog}
+              disabled={isLoading}
             >
               Tambah Berkas
             </Button>
@@ -211,8 +208,11 @@ const ManageDocuments = () => {
           open={showSnackbar}
           autoHideDuration={2500}
           onClose={toggleSnackbar}
-          message={snackbarMessage || "Operasi berhasil"}
-        />
+        >
+          <Alert severity={snackbarSeverity} onClose={toggleSnackbar}>
+            {snackbarMessage || "Operasi berhasil"}
+          </Alert>
+        </Snackbar>
       )}
     </Fragment>
   );

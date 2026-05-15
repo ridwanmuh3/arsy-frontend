@@ -13,7 +13,14 @@ import {
   TablePagination,
 } from "@mui/material";
 import { blue, green, grey } from "@mui/material/colors";
-import { Fragment, type MouseEvent, useEffect, useState } from "react";
+import {
+  Fragment,
+  type MouseEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Refresh, Visibility } from "@mui/icons-material";
 import dayjs from "dayjs";
 import {
@@ -49,6 +56,7 @@ const SearchDocumentRequest = () => {
   const [currentLoanNote, setCurrentLoanNote] = useState<LoanNoteSchema>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [requestID, setRequestID] = useState<string>("");
+  const previousSearchDocumentCount = useRef(0);
 
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
@@ -125,7 +133,7 @@ const SearchDocumentRequest = () => {
     setShowNotification((prevState) => !prevState);
   };
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setIsLoading(true);
 
@@ -137,13 +145,15 @@ const SearchDocumentRequest = () => {
       }
 
       if (
-        fetchedSearchDocumentsRequest.length > searchDocumentData.length &&
+        fetchedSearchDocumentsRequest.length >
+          previousSearchDocumentCount.current &&
         fetchedSearchDocumentsRequest.some(
           (doc: SearchDocumentSchema) => doc.status !== "COMPLETED"
         )
       ) {
         setShowNotification(true);
       }
+      previousSearchDocumentCount.current = fetchedSearchDocumentsRequest.length;
       setSearchDocumentData(fetchedSearchDocumentsRequest);
 
       const fetchedLoanNotes = await findAllLoanNotes();
@@ -158,11 +168,11 @@ const SearchDocumentRequest = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   const paginatedData = searchDocumentData.slice(
     page * rowsPerPage,
@@ -193,11 +203,10 @@ const SearchDocumentRequest = () => {
             <IconButton
               sx={{ height: "2.5rem" }}
               title="Refresh"
-              onClick={() => {
-                fetchData();
-              }}
+              onClick={fetchData}
+              disabled={isLoading}
             >
-              <Refresh color="primary" />
+              <Refresh color={isLoading ? "disabled" : "primary"} />
             </IconButton>
           </Box>
           <TableContainer sx={{ boxShadow: 1 }}>
