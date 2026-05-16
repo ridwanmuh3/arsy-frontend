@@ -1,18 +1,23 @@
-FROM node:20.19.1-alpine
+FROM oven/bun:1.1.42-alpine AS build
 
 WORKDIR /app
 
-COPY package.json .
+COPY package.json bun.lock ./
 
-RUN npm install
-
-RUN npm i -g serve
+RUN bun install --frozen-lockfile
 
 COPY . .
 
-RUN npm run build
+RUN bun run build
+
+FROM oven/bun:1.1.42-alpine
+
+WORKDIR /app
+
+RUN bun add -g serve
+
+COPY --from=build /app/dist ./dist
 
 EXPOSE 8080
 
-CMD [ "serve", "-s", "dist" ]
-
+CMD ["serve", "-s", "dist", "-l", "8080"]
