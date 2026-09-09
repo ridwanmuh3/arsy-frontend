@@ -1,11 +1,4 @@
-import {
-  Article,
-  FindInPage,
-  History,
-  Logout,
-  People,
-  PostAdd,
-} from "@mui/icons-material";
+import { Article, FindInPage, History, Logout, People, PostAdd } from "@mui/icons-material";
 import {
   Box,
   Divider,
@@ -72,10 +65,7 @@ type SidebarContentProps = {
   onShowLogoutDialog: (e: MouseEvent) => void;
 };
 
-const SidebarContent = ({
-  onNavigate,
-  onShowLogoutDialog,
-}: SidebarContentProps) => {
+const SidebarContent = ({ onNavigate, onShowLogoutDialog }: SidebarContentProps) => {
   const user = getUserFromToken();
 
   return (
@@ -107,7 +97,7 @@ const SidebarContent = ({
               textAlign: "start",
             }}
           >
-            Kementerian Agraria dan Tata Ruang / Badan Pertanahan Nasional
+            Kantor Pertanahan Kabupaten Pangandaran
           </h2>
         </Box>
       </Box>
@@ -212,17 +202,10 @@ const Sidebar = ({ mobileOpen, onCloseMobile }: SidebarProps) => {
           },
         }}
       >
-        <SidebarContent
-          onNavigate={onCloseMobile}
-          onShowLogoutDialog={showDialogHandler}
-        />
+        <SidebarContent onNavigate={onCloseMobile} onShowLogoutDialog={showDialogHandler} />
       </Drawer>
 
-      <LogoutDialog
-        showDialog={showDialog}
-        showDialogHandler={showDialogHandler}
-        auth={auth}
-      />
+      <LogoutDialog showDialog={showDialog} showDialogHandler={showDialogHandler} auth={auth} />
     </Fragment>
   );
 };

@@ -51,7 +51,7 @@ const Login = () => {
               width: "15rem",
             }}
           >
-            Kementerian Agraria dan Tata Ruang / Badan Pertanahan Nasional
+            Kantor Pertanahan Kabupaten Pangandaran
           </h2>
         </Box>
         <Box>
@@ -94,11 +94,7 @@ const Login = () => {
                 helperText={form.formState.errors.password?.message}
               />
             </FormControl>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={form.formState.isSubmitting}
-            >
+            <Button type="submit" variant="contained" disabled={form.formState.isSubmitting}>
               {form.formState.isSubmitting ? "Memproses..." : "Login"}
             </Button>
             {error && (
