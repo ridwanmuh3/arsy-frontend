@@ -1,17 +1,15 @@
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import Sidebar from "./Sidebar";
 import { Outlet } from "react-router";
-import "@fontsource/roboto/300.css";
-import "@fontsource/roboto/400.css";
-import "@fontsource/roboto/500.css";
-import "@fontsource/roboto/700.css";
 import Topbar from "./Topbar";
 
 const Layout = () => {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   return (
     <Fragment>
-      <Sidebar />
-      <Topbar />
+      <Sidebar mobileOpen={mobileOpen} onCloseMobile={() => setMobileOpen(false)} />
+      <Topbar onOpenMobileNav={() => setMobileOpen(true)} />
       <main>
         <Outlet />
       </main>

@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   FormControl,
+  FormHelperText,
   InputLabel,
   MenuItem,
   Select,
@@ -70,10 +71,15 @@ const CreateSearchDocumentRequest = () => {
 
   return (
     <Fragment>
-      <Box sx={{ paddingLeft: "17rem", paddingBottom: "2rem" }}>
+      <Box
+        sx={{
+          paddingLeft: { xs: 0, md: "17rem" },
+          paddingBottom: "2rem",
+        }}
+      >
         <Box
           sx={{
-            paddingX: "2rem",
+            paddingX: { xs: "1rem", md: "2rem" },
             display: "flex",
             flexDirection: "column",
             gap: "0.3rem",
@@ -96,7 +102,10 @@ const CreateSearchDocumentRequest = () => {
                 variant="outlined"
                 id="nama-pemohon"
                 label="Nama Pemohon"
+                required
                 {...form.register("nama_peminjam")}
+                error={!!form.formState.errors.nama_peminjam}
+                helperText={form.formState.errors.nama_peminjam?.message}
               />
             </FormControl>
             <FormControl>
@@ -105,7 +114,10 @@ const CreateSearchDocumentRequest = () => {
                 variant="outlined"
                 id="nomor-berkas"
                 label="Nomor Berkas"
+                required
                 {...form.register("nomor_berkas")}
+                error={!!form.formState.errors.nomor_berkas}
+                helperText={form.formState.errors.nomor_berkas?.message}
               />
             </FormControl>
             <FormControl>
@@ -114,13 +126,16 @@ const CreateSearchDocumentRequest = () => {
                 variant="outlined"
                 id="tahun"
                 label="Tahun"
+                required
                 {...form.register("tahun")}
+                error={!!form.formState.errors.tahun}
+                helperText={form.formState.errors.tahun?.message}
               />
             </FormControl>
             <FormControl
               sx={{
                 display: "flex",
-                flexDirection: "row",
+                flexDirection: { xs: "column", sm: "row" },
                 gap: "1.5rem",
               }}
             >
@@ -130,7 +145,10 @@ const CreateSearchDocumentRequest = () => {
                 id="desa"
                 label="Desa"
                 fullWidth
+                required
                 {...form.register("desa")}
+                error={!!form.formState.errors.desa}
+                helperText={form.formState.errors.desa?.message}
               />
               <TextField
                 type="text"
@@ -138,10 +156,16 @@ const CreateSearchDocumentRequest = () => {
                 id="kecamatan"
                 label="Kecamatan"
                 fullWidth
+                required
                 {...form.register("kecamatan")}
+                helperText={form.formState.errors.kecamatan?.message}
+                error={!!form.formState.errors.kecamatan}
               />
             </FormControl>
-            <FormControl>
+            <FormControl
+              required
+              error={!!form.formState.errors.jenis_hak}
+            >
               <InputLabel id="jenis-peminjaman">Jenis Hak</InputLabel>
               <Select
                 labelId="jenis-peminjaman"
@@ -158,6 +182,11 @@ const CreateSearchDocumentRequest = () => {
                 <MenuItem value="WAKAF">WAKAF</MenuItem>
                 <MenuItem value="SHT">SHT</MenuItem>
               </Select>
+              {form.formState.errors.jenis_hak ? (
+                <FormHelperText>
+                  {form.formState.errors.jenis_hak.message}
+                </FormHelperText>
+              ) : null}
             </FormControl>
             <FormControl>
               <TextField
@@ -175,13 +204,16 @@ const CreateSearchDocumentRequest = () => {
                 type="text"
                 id="keterangan"
                 label="Keterangan"
+                required
                 {...form.register("keperluan")}
+                error={!!form.formState.errors.keperluan}
+                helperText={form.formState.errors.keperluan?.message}
               />
             </FormControl>
             <FormControl
               sx={{
                 display: "flex",
-                flexDirection: "row",
+                flexDirection: { xs: "column", sm: "row" },
                 gap: "1.5rem",
               }}
             >
@@ -191,7 +223,7 @@ const CreateSearchDocumentRequest = () => {
                 disabled={!loanNoteData}
                 onClick={() => setShowLoanNote((prevState) => !prevState)}
               >
-                Lihat Nota
+                Lihat Bon
               </Button>
               <Button
                 type="submit"
@@ -211,7 +243,7 @@ const CreateSearchDocumentRequest = () => {
           open={showSnackbar}
           autoHideDuration={2500}
           onClose={showSnackbarHandler}
-          message="Berhasil membuat nota peminjaman"
+          message="Bon peminjaman berhasil dibuat"
         />
       )}
       {loanNoteData && (
@@ -227,6 +259,7 @@ const CreateSearchDocumentRequest = () => {
           }}
         >
           <LoanNote
+            showLoanNote={showLoanNote}
             showLoanNoteHandler={showLoanNoteHandler}
             loanNote={loanNoteData}
           />

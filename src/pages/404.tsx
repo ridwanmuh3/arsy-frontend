@@ -1,9 +1,9 @@
 import { Box, Button, Typography } from "@mui/material";
 import { Fragment } from "react";
 import { Link } from "react-router";
-import { LockOutlined } from "@mui/icons-material";
+import { SearchOff } from "@mui/icons-material";
 
-const ForbiddenPage = () => {
+const NotFoundPage = () => {
   return (
     <Fragment>
       <Box
@@ -19,18 +19,18 @@ const ForbiddenPage = () => {
         }}
       >
         <Box sx={{ color: "text.disabled", "& svg": { fontSize: "4rem" } }}>
-          <LockOutlined />
+          <SearchOff />
         </Box>
         <Typography variant="h4" component="h1">
-          Akses ditolak
+          Halaman tidak ditemukan
         </Typography>
         <Typography
           variant="body1"
           color="text.secondary"
           sx={{ maxWidth: "28rem" }}
         >
-          Role akun Anda tidak memiliki akses ke halaman ini. Hubungi admin
-          jika Anda merasa ini keliru.
+          Alamat yang Anda buka salah atau halaman sudah dipindahkan. Kembali
+          ke beranda untuk melanjutkan pekerjaan Anda.
         </Typography>
         <Button variant="contained" component={Link} to="/">
           Kembali ke beranda
@@ -40,4 +40,4 @@ const ForbiddenPage = () => {
   );
 };
 
-export default ForbiddenPage;
+export default NotFoundPage;

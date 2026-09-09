@@ -104,7 +104,8 @@ const EditUserDialog = ({
               type="text"
               variant="outlined"
               id="fullname"
-              label="Fullname"
+              label="Nama lengkap"
+              required
               {...form.register("fullname")}
               error={!!form.formState.errors.fullname}
               helperText={form.formState.errors.fullname?.message}
@@ -130,15 +131,16 @@ const EditUserDialog = ({
                 disabled
                 {...form.register("role")}
               >
-                <MenuItem value={"LOCKET"}>Locket</MenuItem>
+                <MenuItem value={"LOCKET"}>Loket</MenuItem>
                 <MenuItem value={"ADMIN"}>Admin</MenuItem>
+                <MenuItem value={"SUPER_ADMIN"}>Super Admin</MenuItem>
               </Select>
             </FormControl>
           </Box>
         </DialogContent>
         <DialogActions>
           <Button variant="outlined" onClick={handleClose}>
-            Cancel
+            Batal
           </Button>
           <Button
             type="submit"
@@ -146,7 +148,7 @@ const EditUserDialog = ({
             autoFocus
             disabled={isLoading}
           >
-            Save
+            {isLoading ? "Memproses..." : "Simpan"}
           </Button>
         </DialogActions>
       </form>

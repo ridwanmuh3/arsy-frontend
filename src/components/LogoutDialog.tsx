@@ -35,15 +35,15 @@ const LogoutDialog = ({
   return (
     <Fragment>
       <Dialog open={showDialog} onClose={showDialogHandler}>
-        <DialogTitle id="logout">Logout</DialogTitle>
+        <DialogTitle id="logout">Keluar dari aplikasi?</DialogTitle>
         <DialogContent>
           <DialogContentText id="logout dialog">
-            Are you sure you want to logout?
+            Anda harus login kembali untuk mengakses aplikasi.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button variant="outlined" onClick={showDialogHandler}>
-            Cancel
+            Batal
           </Button>
           <Button
             sx={{
@@ -53,7 +53,7 @@ const LogoutDialog = ({
             onClick={logoutHandler}
             autoFocus
           >
-            Logout
+            Ya, keluar
           </Button>
         </DialogActions>
       </Dialog>

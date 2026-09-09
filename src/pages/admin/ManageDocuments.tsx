@@ -1,4 +1,4 @@
-import { Add } from "@mui/icons-material";
+import { Add, DescriptionOutlined } from "@mui/icons-material";
 import {
   Alert,
   Box,
@@ -21,8 +21,10 @@ import {
   type MouseEvent,
 } from "react";
 import AddDocumentDialog from "../../components/admin/AddDocumentDialog";
+import EmptyState from "../../components/EmptyState";
 import type { DocumentSchema } from "../../schemas/document";
 import { addDocument, findAllDocuments } from "../../api/documents";
+import { useSafePage } from "../../hooks/pagination";
 
 const tableColumns = [
   "No",
@@ -43,8 +45,8 @@ const ManageDocuments = () => {
     "success" | "error"
   >("success");
 
-  const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
+  const [page, setPage] = useSafePage(documents.length, rowsPerPage);
 
   const toggleAddDialog = (e?: MouseEvent) => {
     if (e) e.preventDefault();
@@ -119,10 +121,15 @@ const ManageDocuments = () => {
 
   return (
     <Fragment>
-      <Box sx={{ paddingLeft: "17rem", paddingBottom: "2rem" }}>
+      <Box
+        sx={{
+          paddingLeft: { xs: 0, md: "17rem" },
+          paddingBottom: "2rem",
+        }}
+      >
         <Box
           sx={{
-            paddingX: "2rem",
+            paddingX: { xs: "1rem", md: "2rem" },
             display: "flex",
             flexDirection: "column",
             gap: "1.2rem",
@@ -134,6 +141,8 @@ const ManageDocuments = () => {
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
+              flexWrap: "wrap",
+              rowGap: "0.75rem",
               gap: "2rem",
             }}
           >
@@ -150,7 +159,7 @@ const ManageDocuments = () => {
             </Button>
           </Box>
           <TableContainer sx={{ boxShadow: 1 }}>
-            <Table>
+            <Table sx={{ "& td": { overflowWrap: "anywhere" } }}>
               <TableHead>
                 <TableRow>
                   {tableColumns.map((col) => (
@@ -173,7 +182,19 @@ const ManageDocuments = () => {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={tableColumns.length} align="center">
-                      {isLoading ? <CircularProgress /> : "Belum ada data"}
+                      {isLoading ? (
+                        <CircularProgress />
+                      ) : (
+                        <EmptyState
+                          icon={<DescriptionOutlined />}
+                          title="Belum ada berkas"
+                          description="Berkas arsip yang didaftarkan akan muncul di sini dan bisa dicari lewat permintaan peminjaman."
+                          action={{
+                            label: "Tambah berkas",
+                            onClick: toggleAddDialog,
+                          }}
+                        />
+                      )}
                     </TableCell>
                   </TableRow>
                 )}

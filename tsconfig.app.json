@@ -15,6 +15,9 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
+    /* Test runner types (bun:test) + React types */
+    "types": ["bun-types", "react", "react-dom"],
+
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,

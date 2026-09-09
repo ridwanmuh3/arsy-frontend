@@ -4,6 +4,7 @@ import axios, {
   type AxiosResponse,
 } from "axios";
 import type { TokenResponse } from "../types";
+import { isMockEnabled, mockAdapter } from "../mock/mockAdapter";
 
 type RetriableAxiosRequestConfig = AxiosRequestConfig & {
   _retry?: boolean;
@@ -40,9 +41,15 @@ export const getApiErrorMessage = (error: unknown): string => {
 };
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:9000/api/v1",
+  baseURL: import.meta.env.VITE_API_BASE_URL ?? "http://localhost:9000/api/v1",
   timeout: 5000,
 });
+
+// Mode demo tanpa backend: jawab seluruh request dari mock lokal.
+// Matikan dengan VITE_USE_MOCK=false saat backend asli sudah tersedia.
+if (isMockEnabled()) {
+  axiosInstance.defaults.adapter = mockAdapter;
+}
 
 axiosInstance.interceptors.request.use(
   (request) => {
@@ -70,6 +77,7 @@ axiosInstance.interceptors.response.use(
     if (
       error.response?.status === 401 &&
       originalRequest.url !== "/auth/refresh" &&
+      originalRequest.url !== "/auth/login" &&
       !originalRequest._retry
     ) {
       originalRequest._retry = true;
@@ -82,12 +90,14 @@ axiosInstance.interceptors.response.use(
             throw new Error("refresh token is missing");
           }
 
-          const baseURL = axiosInstance.defaults.baseURL;
-          const response = await axios.post<{ data: TokenResponse }>(
-            `${baseURL}/auth/refresh`,
+          // Lewat axiosInstance (bukan bare axios) agar tetap memakai
+          // baseURL terkonfigurasi + mock adapter saat mode demo.
+          // Rekursi dicegah oleh pengecualian "/auth/refresh" di atas.
+          const response = await axiosInstance.post<{ data: TokenResponse }>(
+            "/auth/refresh",
             {
               refresh_token: refreshToken,
-            }
+            },
           );
 
           const { access_token, refresh_token: newRefreshToken } =
@@ -116,7 +126,10 @@ axiosInstance.interceptors.response.use(
           refreshAndRetryQueue.forEach(({ reject }) => reject(refreshError));
           refreshAndRetryQueue.length = 0;
 
-          if (window.location.pathname !== "/login") {
+          if (
+            typeof window !== "undefined" &&
+            window.location.pathname !== "/login"
+          ) {
             window.location.assign("/login");
           }
 
@@ -129,6 +142,16 @@ axiosInstance.interceptors.response.use(
       return new Promise<AxiosResponse>((resolve, reject) => {
         refreshAndRetryQueue.push({ config: originalRequest, resolve, reject });
       });
+    }
+
+    // Akses ditolak server (mis. role tidak diizinkan): arahkan ke /forbidden
+    // agar pengguna mendapat penjelasan dan jalan kembali, bukan tabel kosong.
+    if (
+      error.response?.status === 403 &&
+      typeof window !== "undefined" &&
+      window.location.pathname !== "/forbidden"
+    ) {
+      window.location.assign("/forbidden");
     }
 
     return Promise.reject(error);

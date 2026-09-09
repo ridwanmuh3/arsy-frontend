@@ -1,69 +1,98 @@
-import { Box } from "@mui/material";
+import { Box, IconButton } from "@mui/material";
 import { Fragment } from "react";
 import { grey } from "@mui/material/colors";
-import { AccountCircleRounded } from "@mui/icons-material";
+import { AccountCircleRounded, Menu } from "@mui/icons-material";
 import { getUserFromToken } from "../lib/auth";
+import { SIDEBAR_WIDTH } from "./Sidebar";
 
-const Topbar = () => {
+type TopbarProps = {
+  onOpenMobileNav: () => void;
+};
+
+const Topbar = ({ onOpenMobileNav }: TopbarProps) => {
   const user = getUserFromToken();
   return (
     <Fragment>
       <Box
         sx={{
-          paddingLeft: "17rem",
+          paddingLeft: { xs: 0, md: SIDEBAR_WIDTH },
           borderBottom: 1,
           borderBottomColor: grey[300],
+          position: "sticky",
+          top: 0,
+          zIndex: 90,
+          backgroundColor: "white",
         }}
       >
         <Box
           sx={{
             width: "100%",
-            height: "4.4rem",
-            padding: "1rem 2rem",
+            minHeight: "4.4rem",
+            padding: { xs: "0.75rem 1rem", md: "1rem 2rem" },
             display: "flex",
-            justifyContent: "end",
+            justifyContent: { xs: "space-between", md: "end" },
             alignItems: "center",
             gap: "0.5rem",
           }}
         >
-          <Box
+          <IconButton
+            aria-label="Buka menu navigasi"
+            onClick={onOpenMobileNav}
             sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "0.1rem",
+              display: { xs: "inline-flex", md: "none" },
+              minWidth: "2.75rem",
+              minHeight: "2.75rem",
             }}
           >
-            <h4
-              style={{
-                textAlign: "end",
-                margin: 0,
-              }}
-            >
-              {user ? user.fullname : "John Doe"}
-            </h4>
-            <p
-              style={{
-                textAlign: "end",
-                margin: 0,
-                fontSize: "0.8rem",
-              }}
-            >
-              {user ? user.role : "Unknown"}
-            </p>
-          </Box>
+            <Menu />
+          </IconButton>
           <Box
             sx={{
               display: "flex",
-              justifyContent: "center",
+              justifyContent: "end",
               alignItems: "center",
+              gap: "0.5rem",
             }}
           >
-            <AccountCircleRounded
+            <Box
               sx={{
-                fontSize: "2.5rem",
-                color: "grey",
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.1rem",
               }}
-            />
+            >
+              <h4
+                style={{
+                  textAlign: "end",
+                  margin: 0,
+                }}
+              >
+                {user ? user.fullname : "—"}
+              </h4>
+              <p
+                style={{
+                  textAlign: "end",
+                  margin: 0,
+                  fontSize: "0.8rem",
+                }}
+              >
+                {user ? user.role : "—"}
+              </p>
+            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <AccountCircleRounded
+                sx={{
+                  fontSize: "2.5rem",
+                  color: "grey",
+                }}
+              />
+            </Box>
           </Box>
         </Box>
       </Box>

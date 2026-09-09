@@ -1,4 +1,4 @@
-import { Add, Delete, ModeEdit } from "@mui/icons-material";
+import { Add, Delete, ModeEdit, PeopleOutline } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -19,12 +19,14 @@ import {
   useState,
   type MouseEvent,
 } from "react";
-import dayjs from "dayjs";
 import { isAxiosError } from "axios";
+import { formatDateTime } from "../../lib";
+import { useSafePage } from "../../hooks/pagination";
 
 import DeleteUserDialog from "../../components/super-admin/DeleteUserDialog";
 import AddUserDialog from "../../components/super-admin/AddUserDialog";
 import EditUserDialog from "../../components/super-admin/EditUserDialog";
+import EmptyState from "../../components/EmptyState";
 
 import type { UserSchema } from "../../schemas/user";
 import {
@@ -37,11 +39,11 @@ import {
 const tableColumns = [
   "No",
   "Username",
-  "Fullname",
+  "Nama Lengkap",
   "Role",
-  "Created At",
-  "Updated At",
-  "Action",
+  "Dibuat Pada",
+  "Diubah Pada",
+  "Aksi",
 ];
 
 const emptyUser: UserSchema = {
@@ -67,8 +69,8 @@ const ManageUsers = () => {
 
   const [snackbar, setSnackbar] = useState({ open: false, message: "" });
 
-  const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
+  const [page, setPage] = useSafePage(users.length, rowsPerPage);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -83,7 +85,12 @@ const ManageUsers = () => {
 
       setUsers(response);
     } catch (err) {
-      console.error((err as Error).message);
+      const message = (err as Error).message;
+      console.error(message);
+      setSnackbar({
+        open: true,
+        message: `Gagal memuat data pengguna: ${message}`,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -111,7 +118,12 @@ const ManageUsers = () => {
       await refreshUsersAfterAction("Berhasil menambah pengguna");
       setShowAddDialog(false);
     } catch (err) {
-      console.error((err as Error).message);
+      const message = (err as Error).message;
+      console.error(message);
+      setSnackbar({
+        open: true,
+        message: `Gagal menambah pengguna: ${message}`,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -131,7 +143,12 @@ const ManageUsers = () => {
       setShowEditDialog(false);
       setSelectedUser(emptyUser);
     } catch (err) {
-      console.error((err as Error).message);
+      const message = (err as Error).message;
+      console.error(message);
+      setSnackbar({
+        open: true,
+        message: `Gagal mengubah pengguna: ${message}`,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -151,7 +168,12 @@ const ManageUsers = () => {
       setShowDeleteDialog(false);
       setSelectedUserID("");
     } catch (err) {
-      console.error((err as Error).message);
+      const message = (err as Error).message;
+      console.error(message);
+      setSnackbar({
+        open: true,
+        message: `Gagal menghapus pengguna: ${message}`,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -193,10 +215,10 @@ const ManageUsers = () => {
 
   return (
     <Fragment>
-      <Box sx={{ pl: "17rem", pb: "2rem" }}>
+      <Box sx={{ pl: { xs: 0, md: "17rem" }, pb: "2rem" }}>
         <Box
           sx={{
-            px: "2rem",
+            px: { xs: "1rem", md: "2rem" },
             display: "flex",
             flexDirection: "column",
             gap: "1.2rem",
@@ -208,6 +230,8 @@ const ManageUsers = () => {
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
+              flexWrap: "wrap",
+              rowGap: "0.75rem",
               gap: "2rem",
             }}
           >
@@ -224,7 +248,7 @@ const ManageUsers = () => {
           </Box>
 
           <TableContainer sx={{ boxShadow: 1 }}>
-            <Table>
+            <Table sx={{ "& td": { overflowWrap: "anywhere" } }}>
               <TableHead>
                 <TableRow>
                   {tableColumns.map((col) => (
@@ -241,10 +265,10 @@ const ManageUsers = () => {
                       <TableCell>{user.fullname}</TableCell>
                       <TableCell>{user.role}</TableCell>
                       <TableCell>
-                        {dayjs(user.created_at).format("DD MMMM YYYY HH:mm:ss")}
+                        {formatDateTime(user.created_at)}
                       </TableCell>
                       <TableCell>
-                        {dayjs(user.updated_at).format("DD MMMM YYYY HH:mm:ss")}
+                        {formatDateTime(user.updated_at)}
                       </TableCell>
                       <TableCell sx={{ display: "flex", gap: "1rem" }}>
                         <Button
@@ -275,7 +299,19 @@ const ManageUsers = () => {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={tableColumns.length} align="center">
-                      {isLoading ? <CircularProgress /> : "Belum ada data"}
+                      {isLoading ? (
+                        <CircularProgress />
+                      ) : (
+                        <EmptyState
+                          icon={<PeopleOutline />}
+                          title="Belum ada pengguna"
+                          description="Pengguna yang dibuat akan muncul di sini dan langsung bisa login sesuai rolenya."
+                          action={{
+                            label: "Tambah pengguna",
+                            onClick: toggleAddDialog,
+                          }}
+                        />
+                      )}
                     </TableCell>
                   </TableRow>
                 )}

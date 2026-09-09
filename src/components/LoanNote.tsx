@@ -29,7 +29,6 @@ const LoanNote = ({ showLoanNote, showLoanNoteHandler, loanNote }: Props) => {
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: `Bon-${loanNote.nama_peminjam}-${loanNote.tahun}`,
-    onAfterPrint: () => console.log("Print/Save selesai"),
     pageStyle: "landscape",
   });
 
@@ -90,7 +89,7 @@ const LoanNote = ({ showLoanNote, showLoanNoteHandler, loanNote }: Props) => {
         <Box>
           <Typography
             variant="h6"
-            component="h2"
+            component="h3"
             textAlign="center"
             sx={{
               fontSize: { xs: "1rem", sm: "1.15rem", md: "1.25rem" },

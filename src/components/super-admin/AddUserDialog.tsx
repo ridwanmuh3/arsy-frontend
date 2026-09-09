@@ -85,16 +85,20 @@ const AddUserDialog = ({
               variant="outlined"
               id="username"
               label="Username"
+              required
               {...register("username")}
               error={!!errors.username}
-              helperText={errors.username?.message}
+              helperText={
+                errors.username?.message ?? "Minimal 6 karakter, harus unik"
+              }
             />
 
             <TextField
               type="text"
               variant="outlined"
               id="fullname"
-              label="Fullname"
+              label="Nama lengkap"
+              required
               {...register("fullname")}
               error={!!errors.fullname}
               helperText={errors.fullname?.message}
@@ -105,9 +109,10 @@ const AddUserDialog = ({
               variant="outlined"
               id="password"
               label="Password"
+              required
               {...register("password")}
               error={!!errors.password}
-              helperText={errors.password?.message}
+              helperText={errors.password?.message ?? "Minimal 6 karakter"}
             />
             <Controller
               name="role"
@@ -116,8 +121,9 @@ const AddUserDialog = ({
                 <FormControl fullWidth error={!!errors.role}>
                   <InputLabel id="user-role">Role</InputLabel>
                   <Select labelId="user-role" label="Role" {...field}>
-                    <MenuItem value={"LOCKET"}>Locket</MenuItem>
+                    <MenuItem value={"LOCKET"}>Loket</MenuItem>
                     <MenuItem value={"ADMIN"}>Admin</MenuItem>
+                    <MenuItem value={"SUPER_ADMIN"}>Super Admin</MenuItem>
                   </Select>
                   {errors.role && (
                     <FormHelperText>{errors.role.message}</FormHelperText>
@@ -129,7 +135,7 @@ const AddUserDialog = ({
         </DialogContent>
         <DialogActions>
           <Button variant="outlined" onClick={handleClose}>
-            Cancel
+            Batal
           </Button>
           <Button
             type="submit"
@@ -137,7 +143,7 @@ const AddUserDialog = ({
             autoFocus
             disabled={isLoading}
           >
-            Create
+            {isLoading ? "Memproses..." : "Tambah"}
           </Button>
         </DialogActions>
       </form>

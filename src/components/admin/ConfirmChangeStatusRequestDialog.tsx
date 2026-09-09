@@ -30,7 +30,7 @@ const ConfirmChangeStatusRequestDialog = ({
       onClose={showDialogHandler}
     >
       <DialogTitle fontSize="1.5rem" id="confirm-update-status">
-        Ubah Status Request
+        Lanjutkan ke tahap berikutnya?
       </DialogTitle>
       <DialogContent>
         <Box
@@ -41,15 +41,14 @@ const ConfirmChangeStatusRequestDialog = ({
           }}
         >
           <Typography align="center" lineHeight={1.8} variant="body1">
-            Apakah anda yakin ingin mengubah status request? Pastikan Anda hanya
-            mengubah status request setelah memverifikasi bahwa perubahan
-            tersebut benar-benar mencerminkan kondisi di lapangan.{" "}
+            Status permintaan akan dimajukan satu tahap dan tercatat atas nama
+            Anda. Pastikan kondisi berkas di lapangan sudah sesuai.
           </Typography>
         </Box>
       </DialogContent>
       <DialogActions>
         <Button variant="outlined" onClick={showDialogHandler}>
-          Cancel
+          Batal
         </Button>
         <Button
           variant="contained"
@@ -57,7 +56,7 @@ const ConfirmChangeStatusRequestDialog = ({
           disabled={isLoading}
           onClick={changeSearchRequestStatusHandler}
         >
-          Ubah Status
+          {isLoading ? "Memproses..." : "Ya, lanjutkan"}
         </Button>
       </DialogActions>
     </Dialog>

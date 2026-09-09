@@ -21,8 +21,9 @@ import {
   useRef,
   useState,
 } from "react";
-import { Refresh, Visibility } from "@mui/icons-material";
-import dayjs from "dayjs";
+import { FindInPage, Refresh, Visibility } from "@mui/icons-material";
+import { findLoanNoteForRequest, formatDateTime } from "../../lib";
+import { useSafePage } from "../../hooks/pagination";
 import {
   findAllSearchDocumentsRequest,
   updateStatusSearchDocumentRequest,
@@ -33,6 +34,7 @@ import { findAllLoanNotes } from "../../api/loan-note";
 import LoanNote from "../../components/LoanNote";
 import type { SearchDocumentSchema } from "../../schemas/search-document";
 import ConfirmChangeStatusRequestDialog from "../../components/admin/ConfirmChangeStatusRequestDialog";
+import EmptyState from "../../components/EmptyState";
 
 const tableColumns = [
   "No",
@@ -47,6 +49,7 @@ const tableColumns = [
 const SearchDocumentRequest = () => {
   const [showSnackbar, setShowSnackbar] = useState<boolean>(false);
   const [showNotification, setShowNotification] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
   const [searchDocumentData, setSearchDocumentData] = useState<
     SearchDocumentSchema[]
   >([]);
@@ -58,8 +61,11 @@ const SearchDocumentRequest = () => {
   const [requestID, setRequestID] = useState<string>("");
   const previousSearchDocumentCount = useRef(0);
 
-  const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
+  const [page, setPage] = useSafePage(
+    searchDocumentData.length,
+    rowsPerPage,
+  );
 
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
@@ -121,7 +127,9 @@ const SearchDocumentRequest = () => {
       setSearchDocumentData(fetchedSearchDocumentsRequest);
       setShowSnackbar(true);
     } catch (error) {
-      console.error((error as Error).message);
+      const message = (error as Error).message;
+      console.error(message);
+      setErrorMessage(`Gagal mengubah status: ${message}. Silakan coba lagi.`);
     } finally {
       setRequestID("");
       setIsLoading(false);
@@ -164,7 +172,9 @@ const SearchDocumentRequest = () => {
 
       setLoanNoteData(fetchedLoanNotes);
     } catch (error) {
-      console.error((error as Error).message);
+      const message = (error as Error).message;
+      console.error(message);
+      setErrorMessage(`Gagal memuat data: ${message}. Tekan Refresh untuk mencoba lagi.`);
     } finally {
       setIsLoading(false);
     }
@@ -181,10 +191,15 @@ const SearchDocumentRequest = () => {
 
   return (
     <Fragment>
-      <Box sx={{ paddingLeft: "17rem", paddingBottom: "2rem" }}>
+      <Box
+        sx={{
+          paddingLeft: { xs: 0, md: "17rem" },
+          paddingBottom: "2rem",
+        }}
+      >
         <Box
           sx={{
-            paddingX: "2rem",
+            paddingX: { xs: "1rem", md: "2rem" },
             display: "flex",
             flexDirection: "column",
             gap: "1.2rem",
@@ -196,13 +211,16 @@ const SearchDocumentRequest = () => {
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
+              flexWrap: "wrap",
+              rowGap: "0.5rem",
               gap: "2rem",
             }}
           >
             <h1>Permintaan Pencarian Berkas</h1>
             <IconButton
-              sx={{ height: "2.5rem" }}
+              sx={{ minWidth: "2.75rem", minHeight: "2.75rem" }}
               title="Refresh"
+              aria-label="Muat ulang data permintaan"
               onClick={fetchData}
               disabled={isLoading}
             >
@@ -210,7 +228,7 @@ const SearchDocumentRequest = () => {
             </IconButton>
           </Box>
           <TableContainer sx={{ boxShadow: 1 }}>
-            <Table>
+            <Table sx={{ "& td": { overflowWrap: "anywhere" } }}>
               <TableHead>
                 <TableRow>
                   {tableColumns.map((name) => (
@@ -226,9 +244,7 @@ const SearchDocumentRequest = () => {
                       <TableCell>
                         {data.created_by_locket_officer_name}
                       </TableCell>
-                      <TableCell>
-                        {dayjs(data.created_at).format("DD MMMM YYYY HH:mm:ss")}
-                      </TableCell>
+                      <TableCell>{formatDateTime(data.created_at)}</TableCell>
                       <TableCell>
                         <Button
                           sx={{
@@ -251,26 +267,28 @@ const SearchDocumentRequest = () => {
                         </Button>
                       </TableCell>
                       <TableCell>
-                        {data.changed_by_archivist_name || "Belum Diketahui"}
+                        {data.changed_by_archivist_name || "Belum diketahui"}
                       </TableCell>
-                      <TableCell>
-                        {dayjs(data.changed_at).format("DD MMMM YYYY HH:mm:ss")}
-                      </TableCell>
+                      <TableCell>{formatDateTime(data.changed_at)}</TableCell>
                       <TableCell>
                         <Button
                           variant="contained"
                           color="primary"
                           startIcon={<Visibility />}
+                          aria-label="Lihat bon peminjaman"
                           onClick={() => {
-                            const borrowerName = data.nama_pemilik;
-                            const currentLoan = loanNoteData.find(
-                              (val) => val.nama_peminjam === borrowerName
+                            const currentLoan = findLoanNoteForRequest(
+                              loanNoteData,
+                              data,
                             );
 
                             if (!currentLoan) {
                               console.error(
-                                "Loan not found for borrower:",
-                                borrowerName
+                                "Bon tidak ditemukan untuk berkas:",
+                                data.nomor_berkas,
+                              );
+                              setErrorMessage(
+                                `Bon untuk berkas ${data.nomor_berkas || "ini"} tidak ditemukan.`,
                               );
                               return;
                             }
@@ -279,7 +297,7 @@ const SearchDocumentRequest = () => {
                             setShowLoanNote(true);
                           }}
                         >
-                          View
+                          Lihat
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -287,7 +305,21 @@ const SearchDocumentRequest = () => {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={tableColumns.length} align="center">
-                      {isLoading ? <CircularProgress /> : "Belum ada data"}
+                      {isLoading ? (
+                        <CircularProgress />
+                      ) : (
+                        <EmptyState
+                          icon={<FindInPage />}
+                          title="Belum ada permintaan"
+                          description="Permintaan pencarian berkas dari petugas loket akan muncul di sini untuk diverifikasi dan dilanjutkan ke tahap berikutnya."
+                          action={{
+                            label: "Muat ulang",
+                            onClick: () => {
+                              void fetchData();
+                            },
+                          }}
+                        />
+                      )}
                     </TableCell>
                   </TableRow>
                 )}
@@ -342,7 +374,15 @@ const SearchDocumentRequest = () => {
         open={showSnackbar}
         autoHideDuration={2500}
         onClose={showSnackbarHandler}
-        message="Berhasil mengubah status request"
+        message="Status permintaan berhasil diubah"
+      />
+
+      <Snackbar
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        open={errorMessage !== ""}
+        autoHideDuration={4000}
+        onClose={() => setErrorMessage("")}
+        message={errorMessage}
       />
 
       <Snackbar

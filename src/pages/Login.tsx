@@ -2,7 +2,6 @@ import { Box, Button, FormControl, TextField, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Fragment, useState } from "react";
-import { red } from "@mui/material/colors";
 import atrBpnLogo from "/icons/logo-atr-bpn.png";
 import { loginSchema, type LoginSchema } from "../schemas/user";
 import { useAuth } from "../hooks/auth";
@@ -20,9 +19,8 @@ const Login = () => {
     <Fragment>
       <Box
         sx={{
-          padding: "2.5rem 2.5rem",
-          minWidth: "16rem",
-          width: "28rem",
+          padding: { xs: "1.5rem 1.25rem", sm: "2.5rem 2.5rem" },
+          width: "min(28rem, calc(100vw - 2rem))",
           display: "flex",
           flexDirection: "column",
           gap: "1rem",
@@ -78,19 +76,11 @@ const Login = () => {
                 variant="outlined"
                 id="username"
                 label="Username"
+                required
                 {...form.register("username")}
+                error={!!form.formState.errors.username}
+                helperText={form.formState.errors.username?.message}
               />
-              {form.formState.errors.username ? (
-                <span
-                  style={{
-                    color: red[500],
-                    marginTop: "0.7rem",
-                    textAlign: "center",
-                  }}
-                >
-                  {form.formState.errors.username.message}
-                </span>
-              ) : null}
             </FormControl>
             <FormControl>
               <TextField
@@ -98,26 +88,18 @@ const Login = () => {
                 variant="outlined"
                 id="password"
                 label="Password"
+                required
                 {...form.register("password")}
+                error={!!form.formState.errors.password}
+                helperText={form.formState.errors.password?.message}
               />
-              {form.formState.errors.password ? (
-                <span
-                  style={{
-                    color: red[500],
-                    marginTop: "0.7rem",
-                    textAlign: "center",
-                  }}
-                >
-                  {form.formState.errors.password.message}
-                </span>
-              ) : null}
             </FormControl>
             <Button
               type="submit"
               variant="contained"
               disabled={form.formState.isSubmitting}
             >
-              Login
+              {form.formState.isSubmitting ? "Memproses..." : "Login"}
             </Button>
             {error && (
               <Typography color="error" align="center">

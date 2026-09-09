@@ -25,15 +25,16 @@ const DeleteUserDialog = ({
 }: Props) => {
   return (
     <Dialog open={showDialog} onClose={showDialogHandler}>
-      <DialogTitle id="delete-user">Hapus Pengguna</DialogTitle>
+      <DialogTitle id="delete-user">Hapus pengguna ini?</DialogTitle>
       <DialogContent>
         <DialogContentText id="delete-user-dialog">
-          Apakah anda yakin ingin menghapus pengguna ?
+          Pengguna yang dihapus tidak bisa dikembalikan dan langsung kehilangan
+          akses ke aplikasi.
         </DialogContentText>
       </DialogContent>
       <DialogActions>
         <Button variant="outlined" onClick={showDialogHandler}>
-          Cancel
+          Batal
         </Button>
         <Button
           color="error"
@@ -41,7 +42,7 @@ const DeleteUserDialog = ({
           onClick={() => deleteUserHandler(userID)}
           disabled={isLoading}
         >
-          Hapus
+          {isLoading ? "Memproses..." : "Ya, hapus"}
         </Button>
       </DialogActions>
     </Dialog>
